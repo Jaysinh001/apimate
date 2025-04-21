@@ -1,11 +1,28 @@
 import 'package:flutter/material.dart';
 
+import '../../../bloc/theme_bloc/theme_bloc.dart';
+
 class AppColors {
   static const dracula = _DraculaColors();
   static const monokai = _MonokaiColors();
   static const solarized = _SolarizedColors();
   static const gruvbox = _GruvboxColors();
   static const nord = _NordColors();
+
+  dynamic getCurrentColorScheme({required ThemeNames theme}) {
+    switch (theme) {
+      case ThemeNames.dracula:
+        return AppColors.dracula;
+      case ThemeNames.monokai:
+        return AppColors.monokai;
+      case ThemeNames.solarized:
+        return AppColors.solarized;
+      case ThemeNames.gruvbox:
+        return AppColors.gruvbox;
+      case ThemeNames.nord:
+        return AppColors.nord;
+    }
+  }
 }
 
 class _DraculaColors {

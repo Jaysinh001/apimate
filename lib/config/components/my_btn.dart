@@ -1,4 +1,7 @@
+import 'package:apimate/bloc/theme_bloc/theme_bloc.dart';
+import 'package:apimate/config/theme/app_theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../theme/color/colors.dart';
 import 'my_text.dart';
@@ -26,17 +29,21 @@ class MyBtn extends StatelessWidget {
         alignment: Alignment.center,
         padding: EdgeInsets.all(MediaQuery.sizeOf(context).aspectRatio * 30),
         decoration: BoxDecoration(
-          color: btnColor,
-          borderRadius: BorderRadius.circular(100),
+          color:
+              btnColor ??
+              AppColors()
+                  .getCurrentColorScheme(
+                    theme: context.read<ThemeBloc>().state.theme,
+                  )
+                  .primary,
+          borderRadius: BorderRadius.circular(10),
         ),
         child:
             btnWidget ??
             MyText.bodyMedium(
               title ?? "",
               fontWeightType: FontWeightType.semiBold,
-              style: TextStyle(
-                // color: titleColor ?? AppColors.white,
-              ),
+              style: TextStyle(color: titleColor ?? Colors.white),
             ),
       ),
     );

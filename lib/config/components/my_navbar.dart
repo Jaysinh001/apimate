@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../theme/color/colors.dart';
 import 'my_text.dart';
 
 class MyNavbar extends StatelessWidget implements PreferredSizeWidget {
@@ -46,12 +45,7 @@ class MyNavbar extends StatelessWidget implements PreferredSizeWidget {
       title: MyText.bodyLarge(
         title ?? "",
         fontWeightType: FontWeightType.bold,
-        style:
-            titleStyle ??
-            const TextStyle(
-              // color: AppColors.neutral100,
-              fontSize: 20,
-            ),
+        style: titleStyle ?? const TextStyle(fontSize: 20),
       ),
       centerTitle: true,
       actions: [trailing ?? const SizedBox()],

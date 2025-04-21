@@ -120,24 +120,24 @@ class MyTextfield extends StatelessWidget {
             ),
             suffixIcon: suffix,
             prefixIcon: prefix,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(
-                // color: AppColors.neutral30,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(
-                // color: AppColors.neutral40,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(
-                // color: AppColors.neutral40,
-              ),
-            ),
+            // border: OutlineInputBorder(
+            //   borderRadius: BorderRadius.circular(8),
+            //   borderSide: const BorderSide(
+            //     // color: AppColors.neutral30,
+            //   ),
+            // ),
+            // focusedBorder: OutlineInputBorder(
+            //   borderRadius: BorderRadius.circular(8),
+            //   borderSide: const BorderSide(
+            //     // color: AppColors.neutral40,
+            //   ),
+            // ),
+            // enabledBorder: OutlineInputBorder(
+            //   borderRadius: BorderRadius.circular(8),
+            //   borderSide: const BorderSide(
+            //     // color: AppColors.neutral40,
+            //   ),
+            // ),
           ),
         ),
       ],

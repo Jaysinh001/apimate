@@ -15,3 +15,12 @@ class ToggleRequestType extends ApiRequestEvent {
   @override
   List<Object?> get props => [isGetRequest];
 }
+
+class ApiTextChanged extends ApiRequestEvent {
+  final String api;
+
+  const ApiTextChanged({required this.api});
+
+  @override
+  List<Object?> get props => [api];
+}
