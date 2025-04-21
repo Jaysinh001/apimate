@@ -1,11 +1,19 @@
 import 'package:apimate/bloc/api_reqiest_bloc/api_request_bloc.dart';
 import 'package:apimate/config/components/my_btn.dart';
+import 'package:apimate/config/components/my_gap.dart';
+import 'package:apimate/config/components/my_textfield.dart';
+import 'package:apimate/views/api_request/authorization_view.dart';
+import 'package:apimate/views/api_request/body_view.dart';
+import 'package:apimate/views/api_request/headers_view.dart';
+import 'package:apimate/views/api_request/params_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/theme_bloc/theme_bloc.dart';
 import '../../config/components/my_navbar.dart';
 import '../../config/components/my_text.dart';
+import '../../config/theme/color/colors.dart';
+import '../../config/utility/screen_config.dart';
 
 class ApiRequestView extends StatefulWidget {
   const ApiRequestView({super.key});
@@ -14,18 +22,27 @@ class ApiRequestView extends StatefulWidget {
   State<ApiRequestView> createState() => _ApiRequestViewState();
 }
 
-class _ApiRequestViewState extends State<ApiRequestView> {
+class _ApiRequestViewState extends State<ApiRequestView>
+    with SingleTickerProviderStateMixin {
   late ApiRequestBloc apiRequestBloc;
+  late TabController tabController;
+
+  final apiController = TextEditingController();
+  final headersController = TextEditingController();
+  final payloadController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
 
     apiRequestBloc = context.read<ApiRequestBloc>();
+    tabController = TabController(vsync: this, length: 4);
   }
 
   @override
   Widget build(BuildContext context) {
+    final ScreenConfig screenConfig = ScreenConfig(context);
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -74,34 +91,116 @@ class _ApiRequestViewState extends State<ApiRequestView> {
               ),
             ),
 
-            BlocBuilder<ApiRequestBloc, ApiRequestState>(
-              builder: (context, state) {
-                return Row(
-                  children: [
-                    Expanded(
-                      child: MyBtn(
-                        title: "GET",
-                        onBtnTap: () {
-                          apiRequestBloc.add(
-                            ToggleRequestType(isGetRequest: true),
-                          );
-                          
-                        },
+            // API Request Type Toggle button
+            Padding(
+              padding: screenConfig.paddingH,
+              child: BlocBuilder<ApiRequestBloc, ApiRequestState>(
+                builder: (context, state) {
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: MyBtn(
+                          title: "GET",
+                          onBtnTap: () {
+                            apiRequestBloc.add(
+                              ToggleRequestType(isGetRequest: true),
+                            );
+                          },
+                          btnColor:
+                              state.isGetRequest ? null : Colors.transparent,
+                          titleColor:
+                              state.isGetRequest
+                                  ? null
+                                  : AppColors()
+                                      .getCurrentColorScheme(
+                                        theme:
+                                            context
+                                                .read<ThemeBloc>()
+                                                .state
+                                                .theme,
+                                      )
+                                      .primary,
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: MyBtn(
-                        title: "POST",
-                        onBtnTap: () {
-                          apiRequestBloc.add(
-                            ToggleRequestType(isGetRequest: false),
-                          );
-                        },
+                      Expanded(
+                        child: MyBtn(
+                          title: "POST",
+                          titleColor:
+                              state.isGetRequest
+                                  ? AppColors()
+                                      .getCurrentColorScheme(
+                                        theme:
+                                            context
+                                                .read<ThemeBloc>()
+                                                .state
+                                                .theme,
+                                      )
+                                      .primary
+                                  : null,
+                          onBtnTap: () {
+                            apiRequestBloc.add(
+                              ToggleRequestType(isGetRequest: false),
+                            );
+                          },
+                          btnColor:
+                              state.isGetRequest ? Colors.transparent : null,
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              },
+                    ],
+                  );
+                },
+              ),
+            ),
+
+            // Add Api Textfield
+            Padding(
+              padding: screenConfig.padding,
+              child: MyTextfield(
+                hint: "Enter Api",
+                controller: apiController,
+                onChanged: (value) {
+                  apiRequestBloc.add(ApiTextChanged(api: value));
+                },
+              ),
+            ),
+
+            // All Row Buttons
+            // Padding(
+            //   padding: screenConfig.paddingH,
+            //   child: Row(
+            //     children: [
+            //       MyBtn(title: "Params", onBtnTap: () {}),
+            //       MyGap(gap: 3),
+            //       MyBtn(title: "Authorization", onBtnTap: () {}),
+            //       MyGap(gap: 3),
+            //       MyBtn(title: "Headers", onBtnTap: () {}),
+            //       MyBtn(title: "Body", onBtnTap: () {}),
+            //     ],
+            //   ),
+            // ),
+            MyGap(gap: 6),
+            TabBar(
+              controller: tabController,
+              isScrollable: true,
+              tabAlignment: TabAlignment.center,
+              tabs: [
+                MyText.bodyLarge("Params"),
+                MyText.bodyLarge("Authorization"),
+                MyText.bodyLarge("Headers"),
+                MyText.bodyLarge("Body"),
+              ],
+            ),
+
+            Expanded(
+              child: TabBarView(
+                controller: tabController,
+                children: [
+                  ParamsView(),
+                  AuthorizationView(),
+                  HeadersView(),
+                  BodyView(controller: payloadController),
+                ],
+              ),
             ),
           ],
         ),
