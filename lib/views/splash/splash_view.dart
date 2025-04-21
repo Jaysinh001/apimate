@@ -23,13 +23,13 @@ class _SplashViewState extends State<SplashView> {
 
     Navigator.pushNamedAndRemoveUntil(
       context,
-      RoutesName.apiRequestView,
+      RoutesName.apiCollections,
       (route) => false,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: MyText.bodyLarge("splash Screen")));
+    return Scaffold(body: Center(child: MyText.bodyLarge("API Mate")));
   }
 }

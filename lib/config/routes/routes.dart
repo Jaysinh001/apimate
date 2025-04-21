@@ -1,3 +1,4 @@
+import 'package:apimate/views/api_collections/api_collections.dart';
 import 'package:flutter/material.dart';
 
 import '../../views/views.dart';
@@ -10,6 +11,10 @@ class Routes {
         return MaterialPageRoute(builder: (context) => const SplashView());
       case RoutesName.apiRequestView:
         return MaterialPageRoute(builder: (context) => const ApiRequestView());
+      case RoutesName.apiCollections:
+        return MaterialPageRoute(
+          builder: (context) => const ApiCollectionsScreen(),
+        );
       //   case RoutesName.updateAppView:
       //     return MaterialPageRoute(builder: (context) => const UpdateAppScreen());
       //   case RoutesName.maintainanceView:
