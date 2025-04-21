@@ -10,19 +10,21 @@ class MyNavbar extends StatelessWidget implements PreferredSizeWidget {
   final TextStyle? titleStyle;
   final Widget? trailing;
 
-  const MyNavbar(
-      {super.key,
-      this.showBackBtn = true,
-      this.backBtnTap,
-      this.title,
-      this.trailing,
-      this.titleStyle});
+  const MyNavbar({
+    super.key,
+    this.showBackBtn = true,
+    this.backBtnTap,
+    this.title,
+    this.trailing,
+    this.titleStyle,
+  });
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       elevation: 0,
       scrolledUnderElevation: 0,
+      backgroundColor: Colors.transparent,
       leading: Visibility(
         visible: showBackBtn,
         child: GestureDetector(
@@ -30,12 +32,13 @@ class MyNavbar extends StatelessWidget implements PreferredSizeWidget {
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 6),
             decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.neutral30)),
+              shape: BoxShape.circle,
+              // border: Border.all(color: AppColors.neutral30)
+            ),
             child: const Icon(
               Icons.arrow_back_ios_new_rounded,
               size: 20,
-              color: AppColors.neutral100,
+              // color: AppColors.neutral100,
             ),
           ),
         ),
@@ -43,9 +46,10 @@ class MyNavbar extends StatelessWidget implements PreferredSizeWidget {
       title: MyText.bodyLarge(
         title ?? "",
         fontWeightType: FontWeightType.bold,
-        style: titleStyle ??
+        style:
+            titleStyle ??
             const TextStyle(
-              color: AppColors.neutral100,
+              // color: AppColors.neutral100,
               fontSize: 20,
             ),
       ),

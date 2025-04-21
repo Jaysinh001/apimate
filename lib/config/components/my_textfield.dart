@@ -43,8 +43,9 @@ class MyTextfield extends StatelessWidget {
 
   String? defaultValidation(String? value) {
     // Prevent script and SQL injection by disallowing certain characters
-    final disallowedCharacters =
-        RegExp('[<>"\'%;()&+]'); // Characters commonly used in injections
+    final disallowedCharacters = RegExp(
+      '[<>"\'%;()&+]',
+    ); // Characters commonly used in injections
 
     if (value!.isEmpty) {
       return 'Please enter value';
@@ -66,15 +67,13 @@ class MyTextfield extends StatelessWidget {
             label ?? "",
             fontWeightType: FontWeightType.semiBold,
             style: const TextStyle(
-              color: AppColors.neutral100,
+              // color: AppColors.neutral100,
             ),
           ),
         ),
         Visibility(
           visible: label != null ? true : false,
-          child: const SizedBox(
-            height: 4,
-          ),
+          child: const SizedBox(height: 4),
         ),
         TextFormField(
           controller: controller,
@@ -85,7 +84,7 @@ class MyTextfield extends StatelessWidget {
           maxLines: isMultiline ? 4 : 1,
           minLines: 1,
           style: const TextStyle(
-            color: AppColors.neutral100,
+            // color: AppColors.neutral100,
             fontWeight: FontWeight.w500,
             fontSize: 14,
             height: 20 / 14,
@@ -93,16 +92,20 @@ class MyTextfield extends StatelessWidget {
           validator: (value) {
             if (shouldValidate && defaultValidation(value) != null) {
               return defaultValidation(
-                  value); // Return default validation error if applicable
+                value,
+              ); // Return default validation error if applicable
             } else {
               return validator?.call(
-                  value); // Call custom validator if default validation passes
+                value,
+              ); // Call custom validator if default validation passes
             }
           },
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          onTapOutside: (event) => unfocusOnTapOutside == false
-              ? null
-              : FocusManager.instance.primaryFocus?.unfocus(),
+          onTapOutside:
+              (event) =>
+                  unfocusOnTapOutside == false
+                      ? null
+                      : FocusManager.instance.primaryFocus?.unfocus(),
           onChanged: onChanged,
           onFieldSubmitted: onFieldSubmit,
           onSaved: onSaved,
@@ -110,7 +113,7 @@ class MyTextfield extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: const TextStyle(
-              color: AppColors.neutral60,
+              // color: AppColors.neutral60,
               fontWeight: FontWeight.w500,
               fontSize: 14,
               height: 20 / 14,
@@ -120,19 +123,19 @@ class MyTextfield extends StatelessWidget {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(
-                color: AppColors.neutral30,
+                // color: AppColors.neutral30,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(
-                color: AppColors.neutral40,
+                // color: AppColors.neutral40,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(
-                color: AppColors.neutral40,
+                // color: AppColors.neutral40,
               ),
             ),
           ),

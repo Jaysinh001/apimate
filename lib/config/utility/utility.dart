@@ -9,11 +9,8 @@ import '../theme/color/colors.dart';
 class Utility {
   static void showToastMessage(String message, BuildContext context) {
     final snackBar = SnackBar(
-      content: Text(
-        message,
-        style: const TextStyle(color: Colors.white),
-      ),
-      backgroundColor: AppColors.primaryColor,
+      content: Text(message, style: const TextStyle(color: Colors.white)),
+      // backgroundColor: AppColors.primaryColor,
       behavior: SnackBarBehavior.floating,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
@@ -31,8 +28,10 @@ class Utility {
     log(message);
   }
 
-  static String formatDateTime(
-      {required DateTime dateTime, required String format}) {
+  static String formatDateTime({
+    required DateTime dateTime,
+    required String format,
+  }) {
     return DateFormat(format).format(dateTime);
   }
 

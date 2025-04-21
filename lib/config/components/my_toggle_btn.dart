@@ -12,8 +12,8 @@ class MyToggleBtn extends StatelessWidget {
     return Switch(
       value: value,
       onChanged: onChanged,
-      inactiveThumbColor: AppColors.neutral70,
-      trackOutlineColor: const WidgetStatePropertyAll(AppColors.neutral70),
+      // inactiveThumbColor: AppColors.neutral70,
+      // trackOutlineColor: const WidgetStatePropertyAll(AppColors.neutral70),
       trackOutlineWidth: const WidgetStatePropertyAll(1.5),
     );
   }

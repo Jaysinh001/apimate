@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 
-import '../theme/color/colors.dart';
 
 class MyLoader extends StatelessWidget {
   final double size;
@@ -14,13 +13,14 @@ class MyLoader extends StatelessWidget {
       child: SizedBox(
         height: size,
         width: size,
-        child: Platform.isAndroid
-            ? const CupertinoActivityIndicator(
-                color: AppColors.primaryColor,
-              )
-            : const CupertinoActivityIndicator(
-                color: AppColors.primaryColor,
-              ),
+        child:
+            Platform.isAndroid
+                ? const CupertinoActivityIndicator(
+                  // color: AppColors.primaryColor,
+                )
+                : const CupertinoActivityIndicator(
+                  // color: AppColors.primaryColor,
+                ),
       ),
     );
   }

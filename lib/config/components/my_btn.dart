@@ -24,19 +24,18 @@ class MyBtn extends StatelessWidget {
       onTap: onBtnTap,
       child: Container(
         alignment: Alignment.center,
-        padding: EdgeInsets.all(
-          MediaQuery.sizeOf(context).aspectRatio * 30,
-        ),
+        padding: EdgeInsets.all(MediaQuery.sizeOf(context).aspectRatio * 30),
         decoration: BoxDecoration(
-          color: btnColor ?? AppColors.primaryColor,
+          color: btnColor,
           borderRadius: BorderRadius.circular(100),
         ),
-        child: btnWidget ??
+        child:
+            btnWidget ??
             MyText.bodyMedium(
               title ?? "",
               fontWeightType: FontWeightType.semiBold,
               style: TextStyle(
-                color: titleColor ?? AppColors.white,
+                // color: titleColor ?? AppColors.white,
               ),
             ),
       ),

@@ -1,108 +1,81 @@
 import 'package:flutter/material.dart';
+import '../../../bloc/theme_bloc/theme_bloc.dart';
 import '../color/colors.dart';
 
 class AppTheme {
-  // Light Theme
-  static final ThemeData lightTheme = ThemeData(
-    brightness: Brightness.light,
-    primaryColor: AppColors.primaryColor,
-    scaffoldBackgroundColor: AppColors.white,
-    appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.white,
-      foregroundColor: AppColors.neutral100,
-      elevation: 0,
-    ),
-    colorScheme: const ColorScheme.light(
-      primary: AppColors.primaryColor,
-      secondary: AppColors.primaryBlueColor,
-      surface: AppColors.surfaceColor,
-      error: AppColors.mainRed,
-      onPrimary: AppColors.white,
-      onSecondary: AppColors.white,
-      onSurface: AppColors.neutral100,
-      onError: AppColors.white,
-    ),
-    textTheme: const TextTheme(
-      displayLarge: TextStyle(
+  ThemeData getTheme({required ThemeNames theme}) {
+    switch (theme) {
+      case ThemeNames.dracula:
+        return _buildTheme(AppColors.dracula);
+      case ThemeNames.monokai:
+        return _buildTheme(AppColors.monokai);
+      case ThemeNames.solarized:
+        return _buildTheme(AppColors.solarized);
+      case ThemeNames.gruvbox:
+        return _buildTheme(AppColors.gruvbox);
+      case ThemeNames.nord:
+        return _buildTheme(AppColors.nord);
+    }
+  }
+
+  ThemeData _buildTheme(dynamic colors) {
+    return ThemeData(
+      scaffoldBackgroundColor: colors.background,
+      primaryColor: colors.primary,
+      appBarTheme: AppBarTheme(
+        backgroundColor: colors.appBar,
+        foregroundColor: colors.textPrimary,
+        elevation: 0,
+      ),
+      colorScheme: ColorScheme(
+        brightness: Brightness.light, // Ignored in your case
+        primary: colors.primary,
+        secondary: colors.secondary,
+        surface: colors.surface,
+        background: colors.background,
+        error: Colors.redAccent,
+        onPrimary: Colors.white,
+        onSecondary: Colors.black,
+        onSurface: colors.textPrimary,
+        onBackground: colors.textPrimary,
+        onError: Colors.white,
+      ),
+      textTheme: TextTheme(
+        displayLarge: TextStyle(
           fontSize: 64,
           fontWeight: FontWeight.bold,
-          color: AppColors.neutral100),
-      displayMedium: TextStyle(
+          color: colors.textPrimary,
+        ),
+        displayMedium: TextStyle(
           fontSize: 48,
           fontWeight: FontWeight.bold,
-          color: AppColors.neutral100),
-      bodyLarge: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.normal,
-          color: AppColors.neutral90),
-      bodyMedium: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.normal,
-          color: AppColors.neutral70),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primaryColor,
-        foregroundColor: AppColors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          color: colors.textPrimary,
+        ),
+        bodyLarge: TextStyle(fontSize: 16, color: colors.textPrimary),
+        bodyMedium: TextStyle(fontSize: 14, color: colors.textSecondary),
       ),
-    ),
-    inputDecorationTheme: const InputDecorationTheme(
-      border: OutlineInputBorder(),
-      enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: AppColors.neutral50)),
-      focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: AppColors.primaryBlueColor)),
-    ),
-  );
-
-  // Dark Theme
-  static final ThemeData darkTheme = ThemeData(
-    brightness: Brightness.dark,
-    primaryColor: AppColors.primaryColor,
-    scaffoldBackgroundColor: AppColors.neutral100,
-    appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.neutral80,
-      foregroundColor: AppColors.white,
-      elevation: 0,
-    ),
-    colorScheme: const ColorScheme.dark(
-      primary: AppColors.primaryColor,
-      secondary: AppColors.primaryBlueColor,
-      surface: AppColors.neutral80,
-      error: AppColors.mainRed,
-      onPrimary: AppColors.white,
-      onSecondary: AppColors.white,
-      onSurface: AppColors.white,
-      onError: AppColors.white,
-    ),
-    textTheme: const TextTheme(
-      displayLarge: TextStyle(
-          fontSize: 64, fontWeight: FontWeight.bold, color: AppColors.white),
-      displayMedium: TextStyle(
-          fontSize: 48, fontWeight: FontWeight.bold, color: AppColors.white),
-      bodyLarge: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.normal,
-          color: AppColors.neutral40),
-      bodyMedium: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.normal,
-          color: AppColors.neutral50),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primaryColor,
-        foregroundColor: AppColors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: colors.primary,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
       ),
-    ),
-    inputDecorationTheme: const InputDecorationTheme(
-      border: OutlineInputBorder(),
-      enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: AppColors.neutral70)),
-      focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: AppColors.primaryBlueColor)),
-    ),
-  );
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(
+          borderSide: BorderSide(color: colors.borderColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: colors.borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: colors.secondary),
+        ),
+        labelStyle: TextStyle(color: colors.textSecondary),
+        hintStyle: TextStyle(color: colors.textSecondary),
+      ),
+    );
+  }
 }
