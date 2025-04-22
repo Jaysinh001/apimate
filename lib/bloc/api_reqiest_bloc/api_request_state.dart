@@ -1,6 +1,6 @@
 part of 'api_request_bloc.dart';
 
-enum ApiRequestStatus { initial, success, error, loading }
+enum ApiRequestStatus { initial, success, error, loading, sendingRequest }
 
 class ApiRequestState extends Equatable {
   final ApiRequestStatus apiRequestStatus;
@@ -8,6 +8,13 @@ class ApiRequestState extends Equatable {
   final String api;
   final String headers;
   final String payload;
+  final String auth;
+  final String selectedAuthType;
+  final String basicAuthUsername;
+  final String basicAuthPassword;
+  final String params;
+  final String bearerToken;
+  final http.Response? response;
   final String? message;
   const ApiRequestState({
     this.apiRequestStatus = ApiRequestStatus.initial,
@@ -15,6 +22,13 @@ class ApiRequestState extends Equatable {
     this.api = '',
     this.headers = '',
     this.payload = '',
+    this.auth = '',
+    this.params = '',
+    this.selectedAuthType = 'No Auth',
+    this.basicAuthUsername = '',
+    this.basicAuthPassword = '',
+    this.bearerToken = '',
+    this.response,
     this.message,
   });
 
@@ -24,6 +38,13 @@ class ApiRequestState extends Equatable {
     String? api,
     String? headers,
     String? payload,
+    String? auth,
+    String? params,
+    String? selectedAuthType,
+    String? basicAuthUsername,
+    String? basicAuthPassword,
+    String? bearerToken,
+    http.Response? response,
     String? message,
   }) => ApiRequestState(
     apiRequestStatus: apiRequestStatus ?? this.apiRequestStatus,
@@ -31,6 +52,13 @@ class ApiRequestState extends Equatable {
     api: api ?? this.api,
     headers: headers ?? this.headers,
     payload: payload ?? this.payload,
+    auth: auth ?? this.auth,
+    params: params ?? this.params,
+    response: response ?? this.response,
+    selectedAuthType: selectedAuthType ?? this.selectedAuthType,
+    basicAuthUsername: basicAuthUsername ?? this.basicAuthUsername,
+    basicAuthPassword: basicAuthPassword ?? this.basicAuthPassword,
+    bearerToken: bearerToken ?? this.bearerToken,
     message: message,
   );
 
@@ -41,6 +69,13 @@ class ApiRequestState extends Equatable {
     api,
     headers,
     payload,
+    auth,
+    params,
+    response,
+    selectedAuthType,
+    basicAuthUsername,
+    basicAuthPassword,
+    bearerToken,
     message,
   ];
 }

@@ -9,6 +9,7 @@ import 'config/theme/app_theme/app_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized;
   runApp(const MyApp());
 }
 
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
       ],
 
       child: BlocBuilder<ThemeBloc, ThemeState>(
+        buildWhen: (previous, current) => current.theme != previous.theme,
         builder: (context, state) {
           return MaterialApp(
             title: 'Apimate',

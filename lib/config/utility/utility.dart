@@ -1,7 +1,14 @@
 import 'dart:developer';
+import 'package:apimate/config/components/my_gap.dart';
+import 'package:apimate/config/components/my_text.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 
+import 'dart:convert';
+
+import '../../bloc/theme_bloc/theme_bloc.dart';
 import '../theme/color/colors.dart';
 
 // import '../theme/color/colors.dart';
@@ -76,5 +83,54 @@ class Utility {
     result += '$minutes min';
 
     return result.trim();
+  }
+
+  static String prettyPrintJson(String jsonString) {
+    var jsonObject = json.decode(jsonString);
+
+    var encoder = const JsonEncoder.withIndent('  ');
+
+    return encoder.convert(jsonObject);
+  }
+
+  static showFullScreenLoader({required BuildContext context, String? title}) {
+    var spinkit = SpinKitPouringHourGlassRefined(
+      color:
+          AppColors()
+              .getCurrentColorScheme(
+                theme: context.read<ThemeBloc>().state.theme,
+              )
+              .primary,
+      size: 50.0,
+    );
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              spinkit,
+              MyGap(gap: 8),
+              MyText.bodyLarge(
+                title ?? "Please wait!",
+                style: TextStyle(
+                  color:
+                      AppColors()
+                          .getCurrentColorScheme(
+                            theme: context.read<ThemeBloc>().state.theme,
+                          )
+                          .primary,
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
+  static hideFullScreenLoader({required BuildContext context}) {
+    if (Navigator.of(context).overlay != null) {
+      Navigator.pop(context);
+    }
   }
 }
