@@ -1,4 +1,5 @@
-import 'package:apimate/views/api_request/api_response_view.dart';
+import 'package:apimate/views/api_collections/api_collections.dart';
+import 'package:apimate/views/api_list/api_list.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -12,6 +13,16 @@ class Routes {
         return MaterialPageRoute(builder: (context) => const SplashView());
       case RoutesName.apiRequestView:
         return MaterialPageRoute(builder: (context) => const ApiRequestView());
+      case RoutesName.apiCollections:
+        return MaterialPageRoute(
+          builder: (context) => const ApiCollectionsScreen(),
+        );
+      case RoutesName.apiList:
+        return MaterialPageRoute(
+          builder:
+              (context) =>
+                  ApiListScreen(collectionName: settings.arguments as String),
+        );
       case RoutesName.apiResponseView:
         return MaterialPageRoute(
           builder:
