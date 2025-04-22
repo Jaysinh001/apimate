@@ -1,5 +1,5 @@
-import 'package:apimate/config/components/my_bottomsheet.dart';
 import 'package:apimate/config/components/my_navbar.dart';
+import 'package:apimate/config/routes/routes_name.dart';
 import 'package:apimate/config/utility/utility.dart';
 import 'package:apimate/views/api_collections/collection_widget.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +16,7 @@ class ApiCollectionsScreen extends StatelessWidget {
         onPressed: () {
           showModalBottomSheet(
             context: context,
+            useSafeArea: true,
             builder: (context) {
               return AddCollectionBottomsheet();
             },
@@ -29,22 +30,37 @@ class ApiCollectionsScreen extends StatelessWidget {
           children: [
             MyNavbar(showBackBtn: false, title: "API Collections"),
             CollectionTile(
-              name: "Mitcon",
+              name: "Mitcon (9)",
               onCollectionTap: () {
                 Utility.showLog("Mitcon clicked!");
+                Navigator.pushNamed(
+                  context,
+                  RoutesName.apiList,
+                  arguments: "Mitcon",
+                );
               },
             ),
             CollectionTile(
-              name: "Dhyey",
+              name: "Dhyey (6)",
               onCollectionTap: () {
                 Utility.showLog("Dhyey Clicked!");
+                Navigator.pushNamed(
+                  context,
+                  RoutesName.apiList,
+                  arguments: "Dhyey",
+                );
               },
             ),
 
             CollectionTile(
-              name: "Dhyey",
+              name: "PCA (4)",
               onCollectionTap: () {
-                Utility.showLog("Dhyey Clicked!");
+                Utility.showLog("PCAs Clicked!");
+                Navigator.pushNamed(
+                  context,
+                  RoutesName.apiList,
+                  arguments: "PCA",
+                );
               },
             ),
           ],

@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 
 // Enum for different font weight variants
-enum FontWeightType {
-  bold,
-  semiBold,
-  medium,
-  regular,
-}
+enum FontWeightType { bold, semiBold, medium, regular }
 
 class MyText extends StatelessWidget {
   final String text;

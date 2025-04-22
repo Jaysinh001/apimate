@@ -1,4 +1,5 @@
 import 'package:apimate/views/api_collections/api_collections.dart';
+import 'package:apimate/views/api_list/api_list.dart';
 import 'package:flutter/material.dart';
 
 import '../../views/views.dart';
@@ -14,6 +15,12 @@ class Routes {
       case RoutesName.apiCollections:
         return MaterialPageRoute(
           builder: (context) => const ApiCollectionsScreen(),
+        );
+      case RoutesName.apiList:
+        return MaterialPageRoute(
+          builder:
+              (context) =>
+                  ApiListScreen(collectionName: settings.arguments as String),
         );
       //   case RoutesName.updateAppView:
       //     return MaterialPageRoute(builder: (context) => const UpdateAppScreen());

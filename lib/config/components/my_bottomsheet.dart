@@ -1,3 +1,4 @@
+import 'package:apimate/config/components/my_gap.dart';
 import 'package:flutter/material.dart';
 
 class MyBottomsheet extends StatelessWidget {
@@ -8,7 +9,7 @@ class MyBottomsheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.maxFinite,
-      height: double.maxFinite,
+      // height: double.maxFinite,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(10),
@@ -16,6 +17,7 @@ class MyBottomsheet extends StatelessWidget {
         ),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             margin: EdgeInsets.only(top: 15),
@@ -27,6 +29,9 @@ class MyBottomsheet extends StatelessWidget {
             ),
           ),
           ...childerns ?? [],
+
+          // SizedBox(height: ),
+          MyGap(gap: (MediaQuery.of(context).viewInsets.bottom + 20)),
         ],
       ),
     );
