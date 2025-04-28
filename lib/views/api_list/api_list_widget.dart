@@ -5,10 +5,18 @@ import 'package:flutter/material.dart';
 import '../../config/utility/screen_config.dart';
 
 class ApiListTile extends StatelessWidget {
-  final VoidCallback? onCollectionTap;
+  final VoidCallback? onTap;
   final String name;
+  final String method;
+  final String url;
 
-  const ApiListTile({super.key, this.onCollectionTap, required this.name});
+  const ApiListTile({
+    super.key,
+    this.onTap,
+    required this.name,
+    required this.method,
+    required this.url,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +24,7 @@ class ApiListTile extends StatelessWidget {
     return Padding(
       padding: screenConfig.padding,
       child: GestureDetector(
-        onTap: onCollectionTap,
+        onTap: onTap,
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
@@ -27,7 +35,7 @@ class ApiListTile extends StatelessWidget {
             padding: screenConfig.paddingH,
             child: ListTile(
               leading: MyText.bodyMedium(
-                "GET",
+                method,
                 style: TextStyle(color: AppColors.dracula.primary),
               ),
               title: MyText.bodyMedium(
@@ -35,7 +43,7 @@ class ApiListTile extends StatelessWidget {
                 fontWeightType: FontWeightType.bold,
               ),
               subtitle: MyText.bodySmall(
-                "http://erp.mitconindia.com:5048/Production/ODataV4/Company('MCES')/WS_Payroll_OverTime",
+                url,
                 // maxLines: 1,
                 style: TextStyle(color: AppColors.dracula.secondary),
               ),
@@ -45,14 +53,6 @@ class ApiListTile extends StatelessWidget {
                 size: 15,
               ),
             ),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //   children: [
-            //     Text(name),
-            //     ListTile( title: Text(name),)
-            //     Icon(Icons.arrow_forward_ios, color: Colors.white, size: 15),
-            //   ],
-            // ),
           ),
         ),
       ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bloc/theme_bloc/theme_bloc.dart';
+import '../../../data/services/shared_preference_manager.dart';
 
 class AppColors {
   static const dracula = _DraculaColors();
@@ -9,7 +11,9 @@ class AppColors {
   static const gruvbox = _GruvboxColors();
   static const nord = _NordColors();
 
-  dynamic getCurrentColorScheme({required ThemeNames theme}) {
+  dynamic getCurrentColorScheme({required BuildContext context}) {
+    var theme = context.read<ThemeBloc>().state.theme;
+
     switch (theme) {
       case ThemeNames.dracula:
         return AppColors.dracula;

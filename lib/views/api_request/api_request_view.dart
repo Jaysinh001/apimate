@@ -16,9 +16,11 @@ import '../../config/routes/routes_name.dart';
 import '../../config/theme/color/colors.dart';
 import '../../config/utility/screen_config.dart';
 import '../../config/utility/utility.dart';
+import '../../domain/model/get_api_list_model.dart';
 
 class ApiRequestView extends StatefulWidget {
-  const ApiRequestView({super.key});
+  final GetApiListModel? selectedApi;
+  const ApiRequestView({super.key, this.selectedApi});
 
   @override
   State<ApiRequestView> createState() => _ApiRequestViewState();
@@ -42,8 +44,13 @@ class _ApiRequestViewState extends State<ApiRequestView>
     apiRequestBloc = context.read<ApiRequestBloc>();
     tabController = TabController(vsync: this, length: 4);
 
-    apiController.text =
-        "https://erp.mitconindia.com:1048/Sandbox/ODataV4/Company('MITCON%20Consultancy%20%26%20Engineeri')/WS_Payroll_Holidays";
+    // assigning the value to respective fields if apiData is not null
+    if (widget.selectedApi != null) {
+      Utility.showLog("selected api not null");
+
+      apiRequestBloc.add(LoadSelectedApiData(api: widget.selectedApi));
+      apiController.text = widget.selectedApi?.url ?? '';
+    }
   }
 
   @override
@@ -87,44 +94,19 @@ class _ApiRequestViewState extends State<ApiRequestView>
               // Nav Bar
               MyNavbar(
                 title: "Api Request",
-                trailing: PopupMenuButton(
-                  icon: Icon(Icons.color_lens_rounded),
-                  onSelected: (value) {
-                    context.read<ThemeBloc>().add(ChangeTheme(theme: value));
-                  },
-                  itemBuilder:
-                      (context) => [
-                        PopupMenuItem(
-                          value: ThemeNames.dracula,
-                          child: MyText.bodyMedium(
-                            ThemeNames.dracula.name.toString(),
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: ThemeNames.gruvbox,
-                          child: MyText.bodyMedium(
-                            ThemeNames.gruvbox.name.toString(),
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: ThemeNames.monokai,
-                          child: MyText.bodyMedium(
-                            ThemeNames.monokai.name.toString(),
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: ThemeNames.nord,
-                          child: MyText.bodyMedium(
-                            ThemeNames.nord.name.toString(),
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: ThemeNames.solarized,
-                          child: MyText.bodyMedium(
-                            ThemeNames.solarized.name.toString(),
-                          ),
-                        ),
-                      ],
+                trailing: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                  child: GestureDetector(
+                    child: MyText.bodyLarge(
+                      "SAVE",
+                      style: TextStyle(
+                        color:
+                            AppColors()
+                                .getCurrentColorScheme(context: context)
+                                .primary,
+                      ),
+                    ),
+                  ),
                 ),
               ),
 
@@ -133,6 +115,7 @@ class _ApiRequestViewState extends State<ApiRequestView>
                 padding: screenConfig.paddingH,
                 child: BlocBuilder<ApiRequestBloc, ApiRequestState>(
                   builder: (context, state) {
+                    Utility.showLog("isGetRequest :: ${state.isGetRequest}");
                     return Row(
                       children: [
                         Expanded(
@@ -149,13 +132,7 @@ class _ApiRequestViewState extends State<ApiRequestView>
                                 state.isGetRequest
                                     ? null
                                     : AppColors()
-                                        .getCurrentColorScheme(
-                                          theme:
-                                              context
-                                                  .read<ThemeBloc>()
-                                                  .state
-                                                  .theme,
-                                        )
+                                        .getCurrentColorScheme(context: context)
                                         .primary,
                           ),
                         ),
@@ -165,13 +142,7 @@ class _ApiRequestViewState extends State<ApiRequestView>
                             titleColor:
                                 state.isGetRequest
                                     ? AppColors()
-                                        .getCurrentColorScheme(
-                                          theme:
-                                              context
-                                                  .read<ThemeBloc>()
-                                                  .state
-                                                  .theme,
-                                        )
+                                        .getCurrentColorScheme(context: context)
                                         .primary
                                     : null,
                             onBtnTap: () {

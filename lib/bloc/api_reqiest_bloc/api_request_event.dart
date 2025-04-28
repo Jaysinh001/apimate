@@ -99,3 +99,19 @@ class BasicAuthPasswordChanged extends ApiRequestEvent {
   @override
   List<Object?> get props => [password];
 }
+
+class LoadSelectedApiData extends ApiRequestEvent {
+  final GetApiListModel? api;
+  const LoadSelectedApiData({this.api});
+
+  @override
+  List<Object?> get props => [api];
+}
+
+class SaveApiToLocalDB extends ApiRequestEvent {
+  final int? apiID;
+  const SaveApiToLocalDB({this.apiID});
+
+  @override
+  List<Object?> get props => [apiID];
+}

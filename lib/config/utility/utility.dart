@@ -1,14 +1,12 @@
 import 'dart:developer';
 import 'package:apimate/config/components/my_gap.dart';
 import 'package:apimate/config/components/my_text.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 
 import 'dart:convert';
 
-import '../../bloc/theme_bloc/theme_bloc.dart';
 import '../theme/color/colors.dart';
 
 // import '../theme/color/colors.dart';
@@ -95,12 +93,7 @@ class Utility {
 
   static showFullScreenLoader({required BuildContext context, String? title}) {
     var spinkit = SpinKitPouringHourGlassRefined(
-      color:
-          AppColors()
-              .getCurrentColorScheme(
-                theme: context.read<ThemeBloc>().state.theme,
-              )
-              .primary,
+      color: AppColors().getCurrentColorScheme(context: context).primary,
       size: 50.0,
     );
 
@@ -117,9 +110,7 @@ class Utility {
                 style: TextStyle(
                   color:
                       AppColors()
-                          .getCurrentColorScheme(
-                            theme: context.read<ThemeBloc>().state.theme,
-                          )
+                          .getCurrentColorScheme(context: context)
                           .primary,
                 ),
               ),

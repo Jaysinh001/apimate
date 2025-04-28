@@ -2,7 +2,6 @@ import 'package:apimate/bloc/api_reqiest_bloc/api_request_bloc.dart';
 import 'package:apimate/config/components/my_gap.dart';
 import 'package:apimate/config/components/my_text.dart';
 import 'package:apimate/config/components/my_textfield.dart';
-import 'package:apimate/config/utility/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -21,13 +20,11 @@ class _AuthorizationViewState extends State<AuthorizationView> {
 
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
+  final bearerController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-
-    usernameController.text = "DHYEY-HR";
-    passwordController.text = "Dcs@2025";
   }
 
   @override
@@ -84,7 +81,7 @@ class _AuthorizationViewState extends State<AuthorizationView> {
                     passwordController: passwordController,
                   )
                   : state.selectedAuthType == 'Bearer'
-                  ? BearerView()
+                  ? BearerView(bearerController: bearerController)
                   : state.selectedAuthType == 'O-auth2'
                   ? OAuth2View()
                   : Expanded(
@@ -141,9 +138,9 @@ class BasicAuthView extends StatelessWidget {
 }
 
 class BearerView extends StatelessWidget {
-  BearerView({super.key});
+  final TextEditingController bearerController;
+  const BearerView({super.key, required this.bearerController});
 
-  final bearerController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Column(

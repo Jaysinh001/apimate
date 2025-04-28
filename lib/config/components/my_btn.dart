@@ -31,11 +31,7 @@ class MyBtn extends StatelessWidget {
         decoration: BoxDecoration(
           color:
               btnColor ??
-              AppColors()
-                  .getCurrentColorScheme(
-                    theme: context.read<ThemeBloc>().state.theme,
-                  )
-                  .primary,
+              AppColors().getCurrentColorScheme(context: context).primary,
           borderRadius: BorderRadius.circular(10),
         ),
         child:

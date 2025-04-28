@@ -1,3 +1,4 @@
+import 'package:apimate/bloc/collection_bloc/collection_bloc.dart';
 import 'package:apimate/config/components/my_btn.dart';
 import 'package:apimate/config/components/my_gap.dart';
 import 'package:apimate/config/components/my_text.dart';
@@ -5,15 +6,16 @@ import 'package:apimate/config/components/my_textfield.dart';
 import 'package:apimate/config/utility/screen_config.dart';
 import 'package:apimate/config/utility/utility.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../config/components/my_bottomsheet.dart';
 
 class AddCollectionBottomsheet extends StatelessWidget {
-  const AddCollectionBottomsheet({super.key});
+  AddCollectionBottomsheet({super.key});
 
+  TextEditingController collectionName = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    TextEditingController collectionName = TextEditingController();
     ScreenConfig screenConfig = ScreenConfig(context);
     return MyBottomsheet(
       childerns: [
@@ -31,6 +33,15 @@ class AddCollectionBottomsheet extends StatelessWidget {
           child: MyBtn(
             onBtnTap: () {
               Utility.showLog("New Collection add button clicked!!");
+
+              if (collectionName.text.isNotEmpty) {
+                context.read<CollectionBloc>().add(CreateCollection(name: collectionName.text));
+              } else {
+                Utility.showToastMessage(
+                  "Collection Name Should Not Be Empty",
+                  context,
+                );
+              }
             },
             title: "Add",
           ),

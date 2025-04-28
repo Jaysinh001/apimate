@@ -6,6 +6,7 @@ import 'package:equatable/equatable.dart';
 import 'package:http/http.dart' as http;
 
 import '../../config/utility/utility.dart';
+import '../../domain/model/get_api_list_model.dart';
 
 part 'api_request_event.dart';
 part 'api_request_state.dart';
@@ -23,6 +24,8 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
     on<BasicAuthUsernameChanged>(handleBasicAuthUsernameChanged);
     on<BasicAuthPasswordChanged>(handleBasicAuthPasswordChanged);
     on<BearerTokenChanged>(handleBearerTokenChanged);
+    on<LoadSelectedApiData>(handleLoadSelectedApiData);
+    on<SaveApiToLocalDB>(handleSaveApiToLocalDB);
   }
 
   FutureOr<void> handleToggleRequestType(
@@ -215,5 +218,32 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
     }
 
     return null;
+  }
+
+  FutureOr<void> handleLoadSelectedApiData(
+    LoadSelectedApiData event,
+    Emitter<ApiRequestState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        api: event.api?.url ?? '',
+        isGetRequest: event.api?.method == "GET" ? true : false,
+      ),
+    );
+  }
+
+  FutureOr<void> handleSaveApiToLocalDB(
+    SaveApiToLocalDB event,
+    Emitter<ApiRequestState> emit,
+  ) {
+
+
+    if (event.apiID != null) {
+      
+    }
+
+    
+
+
   }
 }
