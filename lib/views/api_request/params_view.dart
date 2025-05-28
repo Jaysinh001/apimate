@@ -117,6 +117,8 @@ class ParamsListItem extends StatelessWidget {
                   paramsKey: params.key ?? "",
                   paramsValue: params.value ?? "",
                   apiID: params.apiId ?? 0,
+                  isNew: false,
+                  isActive: params.isActive == 1 ? true : false,
                 ),
           );
         },
@@ -124,7 +126,18 @@ class ParamsListItem extends StatelessWidget {
         horizontalTitleGap: 0,
         leading: Checkbox(
           value: params.isActive == 1 ? true : false,
-          onChanged: (value) {},
+          onChanged: (value) {
+            if (value is bool) {
+              context.read<ApiRequestBloc>().add(
+                UpdateParams(
+                  id: params.id ?? 0,
+                  keyName: params.key,
+                  value: params.value,
+                  isActive: value,
+                ),
+              );
+            }
+          },
         ),
         title: MyText.bodyMedium("Key : ${params.key}"),
         subtitle: MyText.bodyMedium("Value : ${params.value}"),
@@ -148,11 +161,15 @@ class AddParamsBottomSheet extends StatefulWidget {
   final String? paramsKey;
   final String? paramsValue;
   final int apiID;
+  final bool isNew;
+  final bool? isActive;
   const AddParamsBottomSheet({
     super.key,
     this.paramsKey,
     this.paramsValue,
     required this.apiID,
+    this.isNew = true,
+    this.isActive,
   });
 
   @override
@@ -180,11 +197,19 @@ class _AddParamsBottomSheetState extends State<AddParamsBottomSheet> {
         MyText.h6("Add Params"),
         Padding(
           padding: screenConfig.padding,
-          child: MyTextfield(hint: "Key", controller: keyController),
+          child: MyTextfield(
+            hint: "Key",
+            controller: keyController,
+            shouldValidate: false,
+          ),
         ),
         Padding(
           padding: screenConfig.padding,
-          child: MyTextfield(hint: "Value", controller: valueController),
+          child: MyTextfield(
+            hint: "Value",
+            controller: valueController,
+            shouldValidate: false,
+          ),
         ),
         Padding(
           padding: screenConfig.padding,
@@ -194,13 +219,26 @@ class _AddParamsBottomSheetState extends State<AddParamsBottomSheet> {
 
               if (keyController.text.isNotEmpty &&
                   valueController.text.isNotEmpty) {
-                context.read<ApiRequestBloc>().add(
-                  AddParams(
-                    apiID: widget.apiID,
-                    key: keyController.text,
-                    value: valueController.text,
-                  ),
-                );
+                if (widget.isNew) {
+                  context.read<ApiRequestBloc>().add(
+                    AddParams(
+                      apiID: widget.apiID,
+                      key: keyController.text,
+                      value: valueController.text,
+                    ),
+                  );
+                } else {
+                  context.read<ApiRequestBloc>().add(
+                    UpdateParams(
+                      id: widget.apiID,
+                      keyName: keyController.text,
+                      value: valueController.text,
+                      isActive: widget.isActive,
+                    ),
+                  );
+
+                  Navigator.pop(context);
+                }
               } else {
                 Utility.showToastMessage(
                   "Collection Name Should Not Be Empty",

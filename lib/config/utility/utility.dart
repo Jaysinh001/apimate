@@ -14,11 +14,19 @@ import '../theme/color/colors.dart';
 class Utility {
   static void showToastMessage(String message, BuildContext context) {
     final snackBar = SnackBar(
-      content: Text(message, style: const TextStyle(color: Colors.white)),
-      // backgroundColor: AppColors.primaryColor,
+      content: Text(
+        message,
+        style: TextStyle(
+          color:
+              AppColors().getCurrentColorScheme(context: context).textPrimary,
+        ),
+      ),
+      backgroundColor:
+          AppColors().getCurrentColorScheme(context: context).surface,
       behavior: SnackBarBehavior.floating,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+        // borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+        borderRadius: BorderRadius.all(Radius.circular(4)),
       ),
       duration: const Duration(seconds: 4),
     );

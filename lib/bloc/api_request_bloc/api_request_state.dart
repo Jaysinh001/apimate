@@ -4,9 +4,12 @@ enum ApiRequestStatus {
   initial,
   success,
   created,
+  updated,
   error,
   loading,
   sendingRequest,
+  requestFailed,
+  requestSuccess,
 }
 
 class ApiRequestState extends Equatable {

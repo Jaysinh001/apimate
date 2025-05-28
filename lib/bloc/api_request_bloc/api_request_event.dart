@@ -60,6 +60,23 @@ class DeleteParams extends ApiRequestEvent {
   List<Object?> get props => [id];
 }
 
+class UpdateParams extends ApiRequestEvent {
+  final int id;
+  final bool? isActive;
+  final String? keyName;
+  final String? value;
+
+  const UpdateParams({
+    required this.id,
+    this.isActive,
+    this.keyName,
+    this.value,
+  });
+
+  @override
+  List<Object?> get props => [id, isActive, keyName, value];
+}
+
 // >>>>>>>>>>>>>>>>>>>>>>>>>> Authorization Events <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 class AuthChanged extends ApiRequestEvent {

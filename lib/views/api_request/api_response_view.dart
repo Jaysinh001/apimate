@@ -43,26 +43,29 @@ class ApiResponseView extends StatelessWidget {
                 ),
               ),
 
-
-              
-
               MyGap(gap: 10),
 
               // Response Status Code
               Padding(
                 padding: screenConfig.padding,
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     MyText.h6("Response Code : "),
-                    MyText.h5(
-                      '${response.statusCode}  ${response.reasonPhrase}',
+                    Flexible(
+                      child: MyText.h5(
+                        '${response.statusCode}  ${response.reasonPhrase}',
+                        maxLines: 3,
+                      ),
                     ),
                   ],
                 ),
               ),
 
               // Response Status Body
-              MyText.bodyMedium(Utility.prettyPrintJson(response.body)),
+              response.body.isNotEmpty
+                  ? MyText.bodyMedium(Utility.prettyPrintJson(response.body))
+                  : SizedBox(),
             ],
           ),
         ),

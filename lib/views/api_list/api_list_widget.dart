@@ -28,7 +28,13 @@ class ApiListTile extends StatelessWidget {
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.white24, width: 2),
+            border: Border.all(
+              color:
+                  AppColors()
+                      .getCurrentColorScheme(context: context)
+                      .borderColor,
+              width: 2,
+            ),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Padding(
@@ -36,7 +42,12 @@ class ApiListTile extends StatelessWidget {
             child: ListTile(
               leading: MyText.bodyMedium(
                 method,
-                style: TextStyle(color: AppColors.dracula.primary),
+                style: TextStyle(
+                  color:
+                      AppColors()
+                          .getCurrentColorScheme(context: context)
+                          .primary,
+                ),
               ),
               title: MyText.bodyMedium(
                 name,
@@ -45,7 +56,12 @@ class ApiListTile extends StatelessWidget {
               subtitle: MyText.bodySmall(
                 url,
                 // maxLines: 1,
-                style: TextStyle(color: AppColors.dracula.secondary),
+                style: TextStyle(
+                  color:
+                      AppColors()
+                          .getCurrentColorScheme(context: context)
+                          .secondary,
+                ),
               ),
               trailing: Icon(
                 Icons.arrow_forward_ios,

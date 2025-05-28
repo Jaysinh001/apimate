@@ -99,11 +99,11 @@ class _ApiRequestViewState extends State<ApiRequestView>
         body: SafeArea(
           child: BlocListener<ApiRequestBloc, ApiRequestState>(
             listener: (context, state) async {
-              if (state.apiRequestStatus == ApiRequestStatus.success &&
+              if (state.apiRequestStatus == ApiRequestStatus.requestSuccess &&
                   state.response != null) {
                 Utility.hideFullScreenLoader(context: context);
 
-                await Future.delayed(Durations.medium4);
+                // await Future.delayed(Durations.medium4);
                 Navigator.pushNamed(
                   context,
                   RoutesName.apiResponseView,
@@ -111,13 +111,18 @@ class _ApiRequestViewState extends State<ApiRequestView>
                 );
               }
 
-              if (state.apiRequestStatus == ApiRequestStatus.error &&
+              if (state.apiRequestStatus == ApiRequestStatus.requestFailed &&
                   state.message != null) {
                 Utility.hideFullScreenLoader(context: context);
                 Utility.showToastMessage(state.message ?? '', context);
               }
               if (state.apiRequestStatus == ApiRequestStatus.sendingRequest) {
                 Utility.showFullScreenLoader(context: context);
+              }
+
+              if (state.apiRequestStatus == ApiRequestStatus.updated &&
+                  state.response != null) {
+                Utility.showToastMessage(state.message ?? '', context);
               }
             },
             child: Column(

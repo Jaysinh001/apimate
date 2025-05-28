@@ -1,6 +1,9 @@
 import 'package:apimate/config/utility/screen_config.dart';
 import 'package:flutter/material.dart';
 
+import '../../config/components/my_text.dart';
+import '../../config/theme/color/colors.dart';
+
 class CollectionTile extends StatelessWidget {
   final VoidCallback? onCollectionTap;
   final String name;
@@ -17,7 +20,13 @@ class CollectionTile extends StatelessWidget {
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.white24, width: 2),
+            border: Border.all(
+              color:
+                  AppColors()
+                      .getCurrentColorScheme(context: context)
+                      .borderColor,
+              width: 2,
+            ),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Padding(
@@ -25,8 +34,23 @@ class CollectionTile extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(name),
-                Icon(Icons.arrow_forward_ios, color: Colors.white, size: 15),
+                MyText.bodyMedium(
+                  name,
+                  style: TextStyle(
+                    color:
+                        AppColors()
+                            .getCurrentColorScheme(context: context)
+                            .primary,
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color:
+                      AppColors()
+                          .getCurrentColorScheme(context: context)
+                          .borderColor,
+                  size: 15,
+                ),
               ],
             ),
           ),

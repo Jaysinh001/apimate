@@ -22,6 +22,7 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
     on<GetApiParams>(handleGetApiParams);
     on<AddParams>(handleAddParams);
     on<DeleteParams>(handleDeleteParams);
+    on<UpdateParams>(handleUpdateParams);
 
     // >>>>>>>>> Authorization Handlers <<<<<<<<<<
     on<AuthChanged>(handleAuthChanged);
@@ -157,6 +158,56 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
     }
   }
 
+  FutureOr<void> handleUpdateParams(
+    UpdateParams event,
+    Emitter<ApiRequestState> emit,
+  ) async {
+    emit(state.copyWith(apiRequestStatus: ApiRequestStatus.loading));
+
+    try {
+      final query =
+          '''UPDATE query_params SET key = ?, value = ?, is_active = ?, updated_at = ? WHERE id = ?''';
+
+      final res = await databaseService?.executeQuery(
+        sqlQuery: query,
+        arguments: [
+          event.keyName,
+          event.value,
+          (event.isActive ?? false) ? 1 : 0,
+          DateTime.now().toIso8601String(),
+          event.id,
+        ],
+      );
+
+      Utility.showLog("handleUpdateParams :: $res");
+
+      if (res == 0) {
+        emit(
+          state.copyWith(
+            apiRequestStatus: ApiRequestStatus.error,
+            message: "Failed to update this Parameter",
+          ),
+        );
+      } else if (res > 1) {
+        emit(
+          state.copyWith(
+            apiRequestStatus: ApiRequestStatus.error,
+            message: "Oops! multiple Parameters updated!",
+          ),
+        );
+      } else {
+        add(GetApiParams(apiID: event.id));
+      }
+    } catch (e) {
+      emit(
+        state.copyWith(
+          apiRequestStatus: ApiRequestStatus.error,
+          message: "Oops! Something went wrong",
+        ),
+      );
+    }
+  }
+
   FutureOr<void> handleDeleteParams(
     DeleteParams event,
     Emitter<ApiRequestState> emit,
@@ -261,8 +312,6 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
       String query =
           '''INSERT INTO headers (api_id, key, value, created_at, updated_at) VALUES (?, ?, ?, ?, ?)''';
 
-      Utility.showLog("message1");
-
       final res = await databaseService?.executeQuery(
         sqlQuery: query,
         arguments: [
@@ -274,17 +323,11 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
         ],
       );
 
-      Utility.showLog("message2");
-
       if (res is int) {
-        Utility.showLog("message3");
-
         add(GetApiHeaders(apiID: event.apiID));
 
         emit(state.copyWith(apiRequestStatus: ApiRequestStatus.created));
       } else {
-        Utility.showLog("message4");
-
         emit(
           state.copyWith(
             apiRequestStatus: ApiRequestStatus.error,
@@ -365,7 +408,31 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
     try {
       Utility.showLog('handleSendApiRequest called');
 
-      var url = Uri.parse(state.api.trim());
+      // adding active params to URI
+      String url = '';
+
+      // Removing deactivated parameters (unchecked params) from url
+      List<ParamsListModel> tempList = state.params;
+
+      tempList.removeWhere((element) => element.isActive == 0);
+
+      // adding active parameters (checked params) to url
+      for (var i = 0; i < tempList.length; i++) {
+        if (i == 0) {
+          url += '?${tempList[i].key ?? ''}=${tempList[i].value ?? ''}';
+        } else {
+          url += '&${tempList[i].key ?? ''}=${tempList[i].value ?? ''}';
+        }
+
+        Utility.showLog("URL :: $url");
+      }
+
+      url = state.api + url;
+
+      var uri = Uri.parse(url.trim());
+
+      Utility.showLog("URI :: ${uri.path}");
+
       Map<String, String> headers = {
         'Connection': 'keep-alive',
         'Accept': '*/*',
@@ -394,16 +461,17 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
       late http.Response res;
 
       if (state.isGetRequest) {
-        res = await http.get(url, headers: headers);
+        res = await http.get(uri, headers: headers);
       } else {
-        res = await http.post(url, body: payload, headers: headers);
+        res = await http.post(uri, body: payload, headers: headers);
       }
+      Utility.showLog('Response : $res');
       Utility.showLog('Response status: ${res.statusCode}');
       Utility.showLog('Response body: ${res.body}');
 
       emit(
         state.copyWith(
-          apiRequestStatus: ApiRequestStatus.success,
+          apiRequestStatus: ApiRequestStatus.requestSuccess,
           response: res,
         ),
       );
@@ -411,7 +479,7 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
       Utility.showLog('Exception : $e');
       emit(
         state.copyWith(
-          apiRequestStatus: ApiRequestStatus.error,
+          apiRequestStatus: ApiRequestStatus.requestFailed,
           message: "Something went wrong!",
         ),
       );
@@ -480,16 +548,17 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
     LoadSelectedApiData event,
     Emitter<ApiRequestState> emit,
   ) {
+    String url = event.api?.url ?? state.api;
     emit(
       state.copyWith(
-        api: event.api?.url ?? state.api,
+        api: url,
         isGetRequest:
             event.api != null
                 ? event.api?.method == "GET"
                     ? true
                     : false
                 : state.isGetRequest,
-        apiName: event.name ?? event.api?.name ?? '',
+        apiName: event.name ?? state.apiName,
       ),
     );
   }
@@ -498,6 +567,7 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
     SaveApiToLocalDB event,
     Emitter<ApiRequestState> emit,
   ) async {
+    emit(state.copyWith(apiRequestStatus: ApiRequestStatus.loading));
     try {
       String query =
           '''UPDATE apis SET name = ?, method = ?, url = ?, updated_at = ? WHERE id = ?''';
@@ -514,6 +584,34 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
       );
 
       Utility.showLog("handleSaveApiToLocalDB : $res");
-    } catch (e) {}
+
+      if (res == 0) {
+        emit(
+          state.copyWith(
+            apiRequestStatus: ApiRequestStatus.error,
+            message: "Failed to update this Parameter",
+          ),
+        );
+      } else if (res > 1) {
+        emit(
+          state.copyWith(
+            apiRequestStatus: ApiRequestStatus.error,
+            message: "Oops! multiple apis updated!",
+          ),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            apiRequestStatus: ApiRequestStatus.updated,
+            message: "Api Saved",
+          ),
+        );
+      }
+    } catch (e) {
+      state.copyWith(
+        apiRequestStatus: ApiRequestStatus.error,
+        message: "Something went wrong!",
+      );
+    }
   }
 }
