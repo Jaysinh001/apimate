@@ -8,12 +8,14 @@ class MyNavbar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final TextStyle? titleStyle;
   final Widget? trailing;
+  final Widget? titleWidget;
 
   const MyNavbar({
     super.key,
     this.showBackBtn = true,
     this.backBtnTap,
     this.title,
+    this.titleWidget,
     this.trailing,
     this.titleStyle,
   });
@@ -27,7 +29,7 @@ class MyNavbar extends StatelessWidget implements PreferredSizeWidget {
       leading: Visibility(
         visible: showBackBtn,
         child: GestureDetector(
-          onTap: backBtnTap ?? () => Navigator.pop(context),
+          onTap: backBtnTap ?? () => Navigator.pop(context, true),
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 6),
             decoration: BoxDecoration(
@@ -42,11 +44,15 @@ class MyNavbar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ),
-      title: MyText.bodyLarge(
-        title ?? "",
-        fontWeightType: FontWeightType.bold,
-        style: titleStyle ?? const TextStyle(fontSize: 20),
-      ),
+      title:
+          titleWidget ??
+          FittedBox(
+            child: MyText.bodyLarge(
+              title ?? "",
+              fontWeightType: FontWeightType.bold,
+              style: titleStyle ?? const TextStyle(fontSize: 20),
+            ),
+          ),
       centerTitle: true,
       actions: [trailing ?? const SizedBox()],
     );

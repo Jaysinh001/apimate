@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../bloc/api_reqiest_bloc/api_request_bloc.dart';
+import '../../bloc/api_request_bloc/api_request_bloc.dart';
 import '../../config/utility/screen_config.dart';
 
 class BodyView extends StatelessWidget {

@@ -77,6 +77,7 @@ class DatabaseService {
             api_id INTEGER,
             key TEXT NOT NULL,
             value TEXT,
+            is_active INTEGER DEFAULT 1, 
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL,
             FOREIGN KEY (api_id) REFERENCES apis(id) ON DELETE CASCADE

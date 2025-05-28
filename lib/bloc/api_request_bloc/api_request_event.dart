@@ -25,14 +25,42 @@ class ApiTextChanged extends ApiRequestEvent {
   List<Object?> get props => [api];
 }
 
-class ParamsChanged extends ApiRequestEvent {
-  final String params;
+// >>>>>>>>>>>>>>>>>>>>>>>>>> Params Events <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-  const ParamsChanged({required this.params});
+class GetApiParams extends ApiRequestEvent {
+  final int apiID;
+
+  const GetApiParams({required this.apiID});
 
   @override
-  List<Object?> get props => [params];
+  List<Object?> get props => [apiID];
 }
+
+class AddParams extends ApiRequestEvent {
+  final int apiID;
+  final String key;
+  final String value;
+
+  const AddParams({
+    required this.apiID,
+    required this.key,
+    required this.value,
+  });
+
+  @override
+  List<Object?> get props => [apiID, key, value];
+}
+
+class DeleteParams extends ApiRequestEvent {
+  final int id;
+
+  const DeleteParams({required this.id});
+
+  @override
+  List<Object?> get props => [id];
+}
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>> Authorization Events <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 class AuthChanged extends ApiRequestEvent {
   final String auth;
@@ -43,14 +71,42 @@ class AuthChanged extends ApiRequestEvent {
   List<Object?> get props => [auth];
 }
 
-class HeadersChanged extends ApiRequestEvent {
-  final String header;
+// >>>>>>>>>>>>>>>>>>>>>>>>>> Headers Events <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-  const HeadersChanged({required this.header});
+class GetApiHeaders extends ApiRequestEvent {
+  final int apiID;
+
+  const GetApiHeaders({required this.apiID});
 
   @override
-  List<Object?> get props => [header];
+  List<Object?> get props => [apiID];
 }
+
+class AddHeader extends ApiRequestEvent {
+  final int apiID;
+  final String key;
+  final String value;
+
+  const AddHeader({
+    required this.apiID,
+    required this.key,
+    required this.value,
+  });
+
+  @override
+  List<Object?> get props => [apiID, key, value];
+}
+
+class DeleteHeader extends ApiRequestEvent {
+  final int id;
+
+  const DeleteHeader({required this.id});
+
+  @override
+  List<Object?> get props => [id];
+}
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>> Body Events <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 class BodyChanged extends ApiRequestEvent {
   final String body;
@@ -102,16 +158,18 @@ class BasicAuthPasswordChanged extends ApiRequestEvent {
 
 class LoadSelectedApiData extends ApiRequestEvent {
   final GetApiListModel? api;
-  const LoadSelectedApiData({this.api});
+  final String? name;
+  const LoadSelectedApiData({this.api, this.name});
 
   @override
-  List<Object?> get props => [api];
+  List<Object?> get props => [api, name];
 }
 
 class SaveApiToLocalDB extends ApiRequestEvent {
-  final int? apiID;
-  const SaveApiToLocalDB({this.apiID});
+  final int apiID;
+  final String? name;
+  const SaveApiToLocalDB({this.name, required this.apiID});
 
   @override
-  List<Object?> get props => [apiID];
+  List<Object?> get props => [apiID, name];
 }

@@ -30,5 +30,5 @@ class ScreenConfig {
   // EdgeInsets get padding => _mediaQueryData.padding;
   EdgeInsets get paddingH => EdgeInsets.symmetric(horizontal: 12);
   EdgeInsets get paddingV => EdgeInsets.symmetric(vertical: 8);
-  EdgeInsets get padding => EdgeInsets.all(12);
+  EdgeInsets get padding => EdgeInsets.all(10);
 }

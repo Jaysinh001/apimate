@@ -6,6 +6,9 @@ import 'package:apimate/views/api_list/api_list_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../config/utility/utility.dart';
+import '../../domain/model/get_api_list_model.dart';
+
 class ApiListScreen extends StatefulWidget {
   final int collectionID;
 
@@ -16,13 +19,12 @@ class ApiListScreen extends StatefulWidget {
 }
 
 class _ApiListScreenState extends State<ApiListScreen> {
-  late ApiListBloc apiListBloc;
-
+  ApiListBloc apiListBloc = ApiListBloc();
   @override
   void initState() {
     super.initState();
 
-    apiListBloc = ApiListBloc();
+    // apiListBloc = context.read<ApiListBloc>();
     apiListBloc.add(GetApiList(id: widget.collectionID));
   }
 
@@ -35,7 +37,7 @@ class _ApiListScreenState extends State<ApiListScreen> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, RoutesName.apiRequestView);
+          apiListBloc.add(CreateNewApi(collectionID: widget.collectionID));
         },
         child: Icon(Icons.add),
       ),
@@ -49,7 +51,22 @@ class _ApiListScreenState extends State<ApiListScreen> {
                 MyNavbar(title: "API List"),
                 Expanded(
                   child: BlocConsumer<ApiListBloc, ApiListState>(
-                    listener: (context, state) {},
+                    listener: (context, state) async {
+                      if (state.apiListStatus == ApiListStatus.created) {
+                        await Navigator.pushNamed(
+                          context,
+                          RoutesName.apiRequestView,
+                          arguments: state.newApiRequest,
+                        );
+                        // This will be executed once the user comes back to this screen by poping
+                        // all above screens in stack
+                        apiListBloc.add(GetApiList(id: widget.collectionID));
+                      }
+                      if (state.apiListStatus == ApiListStatus.error &&
+                          state.message != null) {
+                        Utility.showToastMessage(state.message ?? '', context);
+                      }
+                    },
                     builder: (context, state) {
                       return state.apiList.isEmpty
                           ? NoDataWidget()
@@ -60,11 +77,19 @@ class _ApiListScreenState extends State<ApiListScreen> {
                                   name: state.apiList[index].name ?? '',
                                   url: state.apiList[index].url ?? '',
                                   method: state.apiList[index].method ?? '',
-                                  onTap: () {
-                                    Navigator.pushNamed(
+                                  onTap: () async {
+                                    await Navigator.pushNamed(
                                       context,
                                       RoutesName.apiRequestView,
                                       arguments: state.apiList[index],
+                                    );
+
+                                    Utility.showLog("After Navigator");
+
+                                    // This will be executed once the user comes back to this screen by poping
+                                    // all above screens in stack
+                                    apiListBloc.add(
+                                      GetApiList(id: widget.collectionID),
                                     );
                                   },
                                 ),

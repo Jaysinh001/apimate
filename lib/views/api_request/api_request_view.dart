@@ -1,4 +1,5 @@
-import 'package:apimate/bloc/api_reqiest_bloc/api_request_bloc.dart';
+import 'package:apimate/bloc/api_list_bloc/api_list_bloc.dart';
+import 'package:apimate/bloc/api_request_bloc/api_request_bloc.dart';
 import 'package:apimate/config/components/my_btn.dart';
 import 'package:apimate/config/components/my_gap.dart';
 import 'package:apimate/config/components/my_textfield.dart';
@@ -9,7 +10,6 @@ import 'package:apimate/views/api_request/params_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../bloc/theme_bloc/theme_bloc.dart';
 import '../../config/components/my_navbar.dart';
 import '../../config/components/my_text.dart';
 import '../../config/routes/routes_name.dart';
@@ -32,10 +32,9 @@ class _ApiRequestViewState extends State<ApiRequestView>
   late TabController tabController;
 
   final apiController = TextEditingController();
-  final paramsController = TextEditingController();
   final authController = TextEditingController();
-  final headersController = TextEditingController();
   final payloadController = TextEditingController();
+  final nameController = TextEditingController();
 
   @override
   void initState() {
@@ -57,148 +56,322 @@ class _ApiRequestViewState extends State<ApiRequestView>
   Widget build(BuildContext context) {
     final ScreenConfig screenConfig = ScreenConfig(context);
 
-    return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          context.read<ApiRequestBloc>().add(SendApiRequest());
-        },
-        label: MyText.bodyMedium("SEND"),
-        icon: Icon(Icons.send_rounded),
-      ),
-      body: SafeArea(
-        child: BlocListener<ApiRequestBloc, ApiRequestState>(
-          listener: (context, state) async {
-            if (state.apiRequestStatus == ApiRequestStatus.success &&
-                state.response != null) {
-              Utility.hideFullScreenLoader(context: context);
+    return PopScope(
+      canPop: widget.selectedApi?.name?.toLowerCase() != "untitled request",
+      onPopInvokedWithResult: (didPop, result) {
+        Utility.showLog("didPop : $didPop  ::: result : $result");
 
-              await Future.delayed(Durations.medium4);
-              Navigator.pushNamed(
-                context,
-                RoutesName.apiResponseView,
-                arguments: state.response,
-              );
-            }
-
-            if (state.apiRequestStatus == ApiRequestStatus.error &&
-                state.message != null) {
-              Utility.hideFullScreenLoader(context: context);
-              Utility.showToastMessage(state.message ?? '', context);
-            }
-            if (state.apiRequestStatus == ApiRequestStatus.sendingRequest) {
-              Utility.showFullScreenLoader(context: context);
-            }
-          },
-          child: Column(
-            children: [
-              // Nav Bar
-              MyNavbar(
-                title: "Api Request",
-                trailing: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                  child: GestureDetector(
-                    child: MyText.bodyLarge(
-                      "SAVE",
-                      style: TextStyle(
-                        color:
-                            AppColors()
-                                .getCurrentColorScheme(context: context)
-                                .primary,
-                      ),
-                    ),
-                  ),
+        if (!didPop) {
+          showDialog(
+            context: context,
+            builder:
+                (context) => SaveApiDialog(
+                  controller: nameController,
+                  onCancelTap: () {
+                    // Pop Dialog and screen
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  },
+                  onSaveTap: () {
+                    if (nameController.text.isNotEmpty) {
+                      context.read<ApiRequestBloc>().add(
+                        SaveApiToLocalDB(
+                          name: nameController.text,
+                          apiID: widget.selectedApi?.id ?? 0,
+                        ),
+                      );
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                    }
+                  },
                 ),
-              ),
+          );
+        }
+      },
+      child: Scaffold(
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            context.read<ApiRequestBloc>().add(SendApiRequest());
+          },
+          label: MyText.bodyMedium("SEND"),
+          icon: Icon(Icons.send_rounded),
+        ),
+        body: SafeArea(
+          child: BlocListener<ApiRequestBloc, ApiRequestState>(
+            listener: (context, state) async {
+              if (state.apiRequestStatus == ApiRequestStatus.success &&
+                  state.response != null) {
+                Utility.hideFullScreenLoader(context: context);
 
-              // API Request Type Toggle button
-              Padding(
-                padding: screenConfig.paddingH,
-                child: BlocBuilder<ApiRequestBloc, ApiRequestState>(
+                await Future.delayed(Durations.medium4);
+                Navigator.pushNamed(
+                  context,
+                  RoutesName.apiResponseView,
+                  arguments: state.response,
+                );
+              }
+
+              if (state.apiRequestStatus == ApiRequestStatus.error &&
+                  state.message != null) {
+                Utility.hideFullScreenLoader(context: context);
+                Utility.showToastMessage(state.message ?? '', context);
+              }
+              if (state.apiRequestStatus == ApiRequestStatus.sendingRequest) {
+                Utility.showFullScreenLoader(context: context);
+              }
+            },
+            child: Column(
+              children: [
+                // Nav Bar
+                BlocBuilder<ApiRequestBloc, ApiRequestState>(
                   builder: (context, state) {
-                    Utility.showLog("isGetRequest :: ${state.isGetRequest}");
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: MyBtn(
-                            title: "GET",
-                            onBtnTap: () {
-                              apiRequestBloc.add(
-                                ToggleRequestType(isGetRequest: true),
-                              );
+                    return MyNavbar(
+                      titleWidget: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          MyText.bodyLarge(
+                            state.apiName,
+                            // widget.selectedApi?.name ?? '',
+                            fontWeightType: FontWeightType.bold,
+                            // style: titleStyle ?? const TextStyle(fontSize: 20),
+                          ),
+                          MyGap(gap: 4),
+                          GestureDetector(
+                            onTap: () {
+                              nameController.text = state.apiName;
+
+                              showDialog(
+                                context: context,
+                                builder:
+                                    (context) => SaveApiDialog(
+                                      controller: nameController,
+                                      onCancelTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                      onSaveTap: () {
+                                        if (nameController.text.isNotEmpty) {
+                                          context.read<ApiRequestBloc>().add(
+                                            SaveApiToLocalDB(
+                                              name: nameController.text,
+                                              apiID:
+                                                  widget.selectedApi?.id ?? 0,
+                                            ),
+                                          );
+                                          Navigator.pop(context, true);
+                                        }
+                                      },
+                                    ),
+                              ).then((val) {
+                                if (val == true) {
+                                  context.read<ApiRequestBloc>().add(
+                                    LoadSelectedApiData(
+                                      name: nameController.text,
+                                    ),
+                                  );
+                                }
+                              });
                             },
-                            btnColor:
-                                state.isGetRequest ? null : Colors.transparent,
-                            titleColor:
-                                state.isGetRequest
-                                    ? null
-                                    : AppColors()
-                                        .getCurrentColorScheme(context: context)
-                                        .primary,
+                            child: Icon(
+                              Icons.edit_note_rounded,
+                              size: 20,
+                              color:
+                                  AppColors()
+                                      .getCurrentColorScheme(context: context)
+                                      .primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      trailing: Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                        child: GestureDetector(
+                          onTap: () {
+                            context.read<ApiRequestBloc>().add(
+                              SaveApiToLocalDB(
+                                apiID: widget.selectedApi?.id ?? 0,
+                              ),
+                            );
+                          },
+                          child: MyText.bodyLarge(
+                            "SAVE",
+                            style: TextStyle(
+                              color:
+                                  AppColors()
+                                      .getCurrentColorScheme(context: context)
+                                      .primary,
+                            ),
                           ),
                         ),
-                        Expanded(
-                          child: MyBtn(
-                            title: "POST",
-                            titleColor:
-                                state.isGetRequest
-                                    ? AppColors()
-                                        .getCurrentColorScheme(context: context)
-                                        .primary
-                                    : null,
-                            onBtnTap: () {
-                              apiRequestBloc.add(
-                                ToggleRequestType(isGetRequest: false),
-                              );
-                            },
-                            btnColor:
-                                state.isGetRequest ? Colors.transparent : null,
-                          ),
-                        ),
-                      ],
+                      ),
                     );
                   },
                 ),
-              ),
 
-              // Add Api Textfield
-              Padding(
-                padding: screenConfig.padding,
-                child: MyTextfield(
-                  hint: "Enter Api",
-                  controller: apiController,
-                  shouldValidate: false,
-                  onChanged: (value) {
-                    apiRequestBloc.add(ApiTextChanged(api: value));
-                  },
+                // API Request Type Toggle button
+                Padding(
+                  padding: screenConfig.paddingH,
+                  child: BlocBuilder<ApiRequestBloc, ApiRequestState>(
+                    builder: (context, state) {
+                      Utility.showLog("isGetRequest :: ${state.isGetRequest}");
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: MyBtn(
+                              title: "GET",
+                              onBtnTap: () {
+                                apiRequestBloc.add(
+                                  ToggleRequestType(isGetRequest: true),
+                                );
+                              },
+                              btnColor:
+                                  state.isGetRequest
+                                      ? null
+                                      : Colors.transparent,
+                              titleColor:
+                                  state.isGetRequest
+                                      ? null
+                                      : AppColors()
+                                          .getCurrentColorScheme(
+                                            context: context,
+                                          )
+                                          .primary,
+                            ),
+                          ),
+                          Expanded(
+                            child: MyBtn(
+                              title: "POST",
+                              titleColor:
+                                  state.isGetRequest
+                                      ? AppColors()
+                                          .getCurrentColorScheme(
+                                            context: context,
+                                          )
+                                          .primary
+                                      : null,
+                              onBtnTap: () {
+                                apiRequestBloc.add(
+                                  ToggleRequestType(isGetRequest: false),
+                                );
+                              },
+                              btnColor:
+                                  state.isGetRequest
+                                      ? Colors.transparent
+                                      : null,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
-              ),
 
-              MyGap(gap: 6),
-              TabBar(
-                controller: tabController,
-                isScrollable: true,
-                tabAlignment: TabAlignment.center,
-                tabs: [
-                  MyText.bodyLarge("Params"),
-                  MyText.bodyLarge("Authorization"),
-                  MyText.bodyLarge("Headers"),
-                  MyText.bodyLarge("Body"),
-                ],
-              ),
+                // Add Api Textfield
+                Padding(
+                  padding: screenConfig.padding,
+                  child: MyTextfield(
+                    hint: "Enter Api",
+                    controller: apiController,
+                    shouldValidate: false,
+                    onChanged: (value) {
+                      apiRequestBloc.add(ApiTextChanged(api: value));
+                    },
+                  ),
+                ),
 
-              Expanded(
-                child: TabBarView(
+                MyGap(gap: 6),
+                TabBar(
                   controller: tabController,
-                  children: [
-                    ParamsView(controller: paramsController),
-                    AuthorizationView(controller: authController),
-                    HeadersView(controller: headersController),
-                    BodyView(controller: payloadController),
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.center,
+                  tabs: [
+                    MyText.bodyLarge("Params"),
+                    MyText.bodyLarge("Authorization"),
+                    MyText.bodyLarge("Headers"),
+                    MyText.bodyLarge("Body"),
                   ],
                 ),
-              ),
-            ],
+
+                Expanded(
+                  child: TabBarView(
+                    controller: tabController,
+                    children: [
+                      ParamsView(apiID: widget.selectedApi?.id ?? 0),
+                      AuthorizationView(controller: authController),
+                      HeadersView(apiID: widget.selectedApi?.id ?? 0),
+                      BodyView(controller: payloadController),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class SaveApiDialog extends StatelessWidget {
+  final VoidCallback onCancelTap;
+  final VoidCallback onSaveTap;
+  final TextEditingController controller;
+  SaveApiDialog({
+    super.key,
+    required this.onCancelTap,
+    required this.onSaveTap,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      // Optional: You can set a shape for the dialog if you want rounded corners or a custom shape.
+      // shape: RoundedRectangleBorder(
+      //   borderRadius: BorderRadius.circular(10.0),
+      // ),s
+      child: Padding(
+        padding: const EdgeInsets.all(
+          20.0,
+        ), // Add some padding around the content
+        child: Column(
+          mainAxisSize:
+              MainAxisSize
+                  .min, // This is crucial for wrapping content vertically
+          children: [
+            MyText.bodyMedium(
+              'Do You Want To Change Request Name?',
+              textAlign: TextAlign.center,
+            ),
+            MyGap(gap: 10),
+            MyTextfield(hint: "Enter Name", controller: controller),
+            MyGap(gap: 16),
+
+            Row(
+              children: [
+                Expanded(
+                  child: MyBtn(
+                    onBtnTap: onCancelTap,
+                    title: "Cancel",
+                    btnColor:
+                        AppColors()
+                            .getCurrentColorScheme(context: context)
+                            .borderColor,
+                  ),
+                ),
+                MyGap(gap: 12),
+                Expanded(
+                  child: MyBtn(
+                    onBtnTap: onSaveTap,
+                    title: "Save",
+                    btnColor:
+                        AppColors()
+                            .getCurrentColorScheme(context: context)
+                            .primary,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

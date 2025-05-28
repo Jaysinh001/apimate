@@ -1,4 +1,5 @@
-import 'package:apimate/bloc/api_reqiest_bloc/api_request_bloc.dart';
+import 'package:apimate/bloc/api_list_bloc/api_list_bloc.dart';
+import 'package:apimate/bloc/api_request_bloc/api_request_bloc.dart';
 import 'package:apimate/bloc/collection_bloc/collection_bloc.dart';
 import 'package:apimate/config/utility/utility.dart';
 import 'package:apimate/data/services/database_service.dart';
@@ -9,7 +10,6 @@ import 'config/routes/routes.dart';
 import 'config/routes/routes_name.dart';
 import 'config/theme/app_theme/app_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 DatabaseService? databaseService;
 void main() {
@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => ThemeBloc()),
         BlocProvider(create: (context) => CollectionBloc()),
+        BlocProvider(create: (context) => ApiListBloc()),
         BlocProvider(create: (context) => ApiRequestBloc()),
       ],
 

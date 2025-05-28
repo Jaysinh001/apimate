@@ -1,18 +1,26 @@
 part of 'api_request_bloc.dart';
 
-enum ApiRequestStatus { initial, success, error, loading, sendingRequest }
+enum ApiRequestStatus {
+  initial,
+  success,
+  created,
+  error,
+  loading,
+  sendingRequest,
+}
 
 class ApiRequestState extends Equatable {
   final ApiRequestStatus apiRequestStatus;
   final bool isGetRequest;
   final String api;
-  final String headers;
+  final String apiName;
+  final List<HeadersListModel> headers;
   final String payload;
   final String auth;
   final String selectedAuthType;
   final String basicAuthUsername;
   final String basicAuthPassword;
-  final String params;
+  final List<ParamsListModel> params;
   final String bearerToken;
   final http.Response? response;
   final String? message;
@@ -20,10 +28,11 @@ class ApiRequestState extends Equatable {
     this.apiRequestStatus = ApiRequestStatus.initial,
     this.isGetRequest = true,
     this.api = '',
-    this.headers = '',
+    this.apiName = '',
+    this.headers = const [],
     this.payload = '',
     this.auth = '',
-    this.params = '',
+    this.params = const [],
     this.selectedAuthType = 'No Auth',
     this.basicAuthUsername = '',
     this.basicAuthPassword = '',
@@ -36,10 +45,11 @@ class ApiRequestState extends Equatable {
     ApiRequestStatus? apiRequestStatus,
     bool? isGetRequest,
     String? api,
-    String? headers,
+    String? apiName,
+    List<HeadersListModel>? headers,
     String? payload,
     String? auth,
-    String? params,
+    List<ParamsListModel>? params,
     String? selectedAuthType,
     String? basicAuthUsername,
     String? basicAuthPassword,
@@ -50,6 +60,7 @@ class ApiRequestState extends Equatable {
     apiRequestStatus: apiRequestStatus ?? this.apiRequestStatus,
     isGetRequest: isGetRequest ?? this.isGetRequest,
     api: api ?? this.api,
+    apiName: apiName ?? this.apiName,
     headers: headers ?? this.headers,
     payload: payload ?? this.payload,
     auth: auth ?? this.auth,
@@ -67,6 +78,7 @@ class ApiRequestState extends Equatable {
     apiRequestStatus,
     isGetRequest,
     api,
+    apiName,
     headers,
     payload,
     auth,
