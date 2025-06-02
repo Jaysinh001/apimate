@@ -143,10 +143,11 @@ class SendApiRequest extends ApiRequestEvent {
 
 class SelectAuthType extends ApiRequestEvent {
   final String? authType;
-  const SelectAuthType({this.authType});
+  final String? apiID;
+  const SelectAuthType({this.apiID, this.authType});
 
   @override
-  List<Object?> get props => [authType];
+  List<Object?> get props => [authType, apiID];
 }
 
 class BearerTokenChanged extends ApiRequestEvent {
@@ -175,17 +176,25 @@ class BasicAuthPasswordChanged extends ApiRequestEvent {
 
 class LoadSelectedApiData extends ApiRequestEvent {
   final GetApiListModel? api;
-  final String? name;
-  const LoadSelectedApiData({this.api, this.name});
+  const LoadSelectedApiData({this.api});
 
   @override
-  List<Object?> get props => [api, name];
+  List<Object?> get props => [api];
 }
 
 class SaveApiToLocalDB extends ApiRequestEvent {
   final int apiID;
+
+  const SaveApiToLocalDB({required this.apiID});
+
+  @override
+  List<Object?> get props => [apiID];
+}
+
+class SaveApiName extends ApiRequestEvent {
+  final int apiID;
   final String? name;
-  const SaveApiToLocalDB({this.name, required this.apiID});
+  const SaveApiName({this.name, required this.apiID});
 
   @override
   List<Object?> get props => [apiID, name];

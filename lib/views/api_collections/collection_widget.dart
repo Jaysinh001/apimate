@@ -6,9 +6,15 @@ import '../../config/theme/color/colors.dart';
 
 class CollectionTile extends StatelessWidget {
   final VoidCallback? onCollectionTap;
+  final VoidCallback? onDeleteTap;
   final String name;
 
-  const CollectionTile({super.key, this.onCollectionTap, required this.name});
+  const CollectionTile({
+    super.key,
+    this.onCollectionTap,
+    required this.name,
+    this.onDeleteTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -43,13 +49,17 @@ class CollectionTile extends StatelessWidget {
                             .primary,
                   ),
                 ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color:
-                      AppColors()
-                          .getCurrentColorScheme(context: context)
-                          .borderColor,
-                  size: 15,
+                GestureDetector(
+                  onTap: onDeleteTap,
+                  child: Icon(
+                    Icons.delete,
+
+                    color:
+                        AppColors()
+                            .getCurrentColorScheme(context: context)
+                            .primary,
+                    size: 20,
+                  ),
                 ),
               ],
             ),

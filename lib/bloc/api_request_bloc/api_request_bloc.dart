@@ -18,6 +18,7 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
   ApiRequestBloc() : super(const ApiRequestState()) {
     on<ToggleRequestType>(handleToggleRequestType);
     on<ApiTextChanged>(handleApiTextChanged);
+    on<SaveApiName>(handleSaveApiName);
     // >>>>>>>>> Params Handlers <<<<<<<<<<
     on<GetApiParams>(handleGetApiParams);
     on<AddParams>(handleAddParams);
@@ -81,11 +82,11 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
         ],
       );
 
-      Utility.showLog("handleGetApiParams ::: $res");
+      // Utility.showLog("handleGetApiParams ::: $res");
 
       final paramsList = paramsListModelFromJson(jsonEncode(res));
 
-      Utility.showLog("headersListModelFromJson ::: $paramsList");
+      // Utility.showLog("headersListModelFromJson ::: $paramsList");
 
       emit(
         state.copyWith(
@@ -115,8 +116,6 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
       String query =
           '''INSERT INTO query_params (api_id, key, value, created_at, updated_at) VALUES (?, ?, ?, ?, ?)''';
 
-      Utility.showLog("message1");
-
       final res = await databaseService?.executeQuery(
         sqlQuery: query,
         arguments: [
@@ -128,17 +127,13 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
         ],
       );
 
-      Utility.showLog("message2 : $res");
+      // Utility.showLog("message2 : $res");
 
       if (res is int) {
-        Utility.showLog("message3");
-
         add(GetApiParams(apiID: event.apiID));
 
         emit(state.copyWith(apiRequestStatus: ApiRequestStatus.created));
       } else {
-        Utility.showLog("message4");
-
         emit(
           state.copyWith(
             apiRequestStatus: ApiRequestStatus.error,
@@ -165,6 +160,13 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
     emit(state.copyWith(apiRequestStatus: ApiRequestStatus.loading));
 
     try {
+      // Utility.showLog("""
+      // event.id :: ${event.id}\n
+      // event.keyName :: ${event.keyName}\n
+      // event.isActive :: ${event.isActive}\n
+      // event.value :: ${event.value}
+      // """);
+
       final query =
           '''UPDATE query_params SET key = ?, value = ?, is_active = ?, updated_at = ? WHERE id = ?''';
 
@@ -196,7 +198,31 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
           ),
         );
       } else {
-        add(GetApiParams(apiID: event.id));
+        var tempList = state.params;
+
+        ParamsListModel param = tempList.firstWhere(
+          (element) => element.id == event.id,
+        );
+
+        final updatedParam = param.copyWith(
+          isActive: (event.isActive ?? false) ? 1 : 0,
+          key: event.keyName,
+          value: event.value,
+          updatedAt: DateTime.now(),
+        );
+
+        int index = tempList.indexWhere((element) => element.id == event.id);
+
+        tempList.removeWhere((element) => element.id == event.id);
+
+        tempList.insert(index, updatedParam);
+
+        emit(
+          state.copyWith(
+            apiRequestStatus: ApiRequestStatus.success,
+            params: tempList,
+          ),
+        );
       }
     } catch (e) {
       emit(
@@ -490,6 +516,14 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
     SelectAuthType event,
     Emitter<ApiRequestState> emit,
   ) {
+    try {
+      String query = '';
+
+      if (event.authType?.toLowerCase() == "no auth") {
+        query = "DELETE FROM headers WHERE api_id = ?";
+      }
+    } catch (e) {}
+
     emit(
       state.copyWith(
         apiRequestStatus: ApiRequestStatus.initial,
@@ -534,16 +568,6 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
     );
   }
 
-  String? generateAuthToken() {
-    if (state.selectedAuthType == 'Basic Auth') {
-      return "Basic ${base64Encode(utf8.encode('${state.basicAuthUsername}:${state.basicAuthPassword}'))}";
-    } else if (state.selectedAuthType == 'Bearer') {
-      return 'Bearer ${state.bearerToken}';
-    }
-
-    return null;
-  }
-
   FutureOr<void> handleLoadSelectedApiData(
     LoadSelectedApiData event,
     Emitter<ApiRequestState> emit,
@@ -558,7 +582,7 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
                     ? true
                     : false
                 : state.isGetRequest,
-        apiName: event.name ?? state.apiName,
+        apiName: event.api?.name ?? state.apiName,
       ),
     );
   }
@@ -569,18 +593,25 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
   ) async {
     emit(state.copyWith(apiRequestStatus: ApiRequestStatus.loading));
     try {
+      // Storing api related data.
       String query =
-          '''UPDATE apis SET name = ?, method = ?, url = ?, updated_at = ? WHERE id = ?''';
+          '''UPDATE apis SET method = ?, url = ?, updated_at = ? WHERE id = ?''';
 
       final res = await databaseService?.executeQuery(
         sqlQuery: query,
         arguments: [
-          event.name ?? "Untitled Request",
           state.isGetRequest ? "GET" : "POST",
           state.api,
           DateTime.now().toIso8601String(),
           event.apiID,
         ],
+      );
+
+      // Storing header related data
+      await saveAuthorizationToDB(
+        apiID: event.apiID,
+        value: generateAuthToken() ?? '',
+        hasAuth: state.selectedAuthType.toLowerCase() != 'no auth',
       );
 
       Utility.showLog("handleSaveApiToLocalDB : $res");
@@ -608,10 +639,119 @@ class ApiRequestBloc extends Bloc<ApiRequestEvent, ApiRequestState> {
         );
       }
     } catch (e) {
+      Utility.showLog("handleSaveApiToLocalDB :: $e");
+
       state.copyWith(
         apiRequestStatus: ApiRequestStatus.error,
         message: "Something went wrong!",
       );
+    }
+  }
+
+  FutureOr<void> handleSaveApiName(
+    SaveApiName event,
+    Emitter<ApiRequestState> emit,
+  ) async {
+    emit(state.copyWith(apiRequestStatus: ApiRequestStatus.loading));
+
+    try {
+      String query =
+          '''UPDATE apis SET name = ?, updated_at = ? WHERE id = ?''';
+
+      final res = await databaseService?.executeQuery(
+        sqlQuery: query,
+        arguments: [
+          event.name ?? state.apiName,
+          DateTime.now().toIso8601String(),
+          event.apiID,
+        ],
+      );
+
+      Utility.showLog("handleSaveApiName : $res");
+
+      if (res == 0) {
+        emit(
+          state.copyWith(
+            apiRequestStatus: ApiRequestStatus.error,
+            message: "Failed to update api name",
+          ),
+        );
+      } else if (res > 1) {
+        emit(
+          state.copyWith(
+            apiRequestStatus: ApiRequestStatus.error,
+            apiName: event.name,
+            message: "Oops! multiple apis updated!",
+          ),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            apiRequestStatus: ApiRequestStatus.updated,
+            message: "Api name saved",
+            apiName: event.name,
+          ),
+        );
+      }
+    } catch (e) {
+      state.copyWith(
+        apiRequestStatus: ApiRequestStatus.error,
+        message: "Something went wrong!",
+      );
+    }
+  }
+
+  // Method to generate Authorization token
+  String? generateAuthToken() {
+    if (state.selectedAuthType == 'Basic Auth') {
+      return "Basic ${base64Encode(utf8.encode('${state.basicAuthUsername}:${state.basicAuthPassword}'))}";
+    } else if (state.selectedAuthType == 'Bearer') {
+      return 'Bearer ${state.bearerToken}';
+    }
+
+    return null;
+  }
+
+  // Method to save Authorization to DB
+  Future<void> saveAuthorizationToDB({
+    required int apiID,
+    required String value,
+    required bool hasAuth,
+  }) async {
+    try {
+      String query =
+          '''SELECT * FROM headers WHERE key = "Authorization" AND api_id = ?''';
+
+      final res = await databaseService?.executeQuery(
+        sqlQuery: query,
+        arguments: [apiID],
+      );
+
+      final List<HeadersListModel> response = headersListModelFromJson(
+        jsonEncode(res),
+      );
+
+      if (response.isNotEmpty && hasAuth) {
+        Utility.showLog("response.isNotEmpty && hasAuth");
+
+        String query =
+            '''UPDATE headers SET value = ?, updated_at = ? WHERE key = "Authorization" AND api_id = ?''';
+
+        final res = await databaseService?.executeQuery(
+          sqlQuery: query,
+          arguments: [value, DateTime.now().toIso8601String(), apiID],
+        );
+      } else if (response.isEmpty && hasAuth) {
+        Utility.showLog("response.isEmpty && hasAuth");
+        add(AddHeader(apiID: apiID, key: "Authorization", value: value));
+      } else if (response.isNotEmpty && !hasAuth) {
+        Utility.showLog("response.isNotEmpty && !hasAuth");
+        // No Auth is selected so delete te Authorization if available
+        add(DeleteHeader(id: response.first.id ?? 0));
+      }
+    } catch (e) {
+      Utility.showLog("saveAuthorizationToDB EXCEPTION :: $e");
+      throw Exception("Failed to save authorization");
     }
   }
 }

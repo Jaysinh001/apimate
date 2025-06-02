@@ -1,4 +1,5 @@
 import 'package:apimate/bloc/api_request_bloc/api_request_bloc.dart';
+import 'package:apimate/config/components/my_btn.dart';
 import 'package:apimate/config/components/my_gap.dart';
 import 'package:apimate/config/components/my_text.dart';
 import 'package:apimate/config/components/my_textfield.dart';
@@ -8,8 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../config/utility/screen_config.dart';
 
 class AuthorizationView extends StatefulWidget {
-  final TextEditingController controller;
-  const AuthorizationView({super.key, required this.controller});
+  const AuthorizationView({super.key});
 
   @override
   State<AuthorizationView> createState() => _AuthorizationViewState();
@@ -25,6 +25,12 @@ class _AuthorizationViewState extends State<AuthorizationView> {
   @override
   void initState() {
     super.initState();
+
+    usernameController.text =
+        context.read<ApiRequestBloc>().state.basicAuthUsername;
+    passwordController.text =
+        context.read<ApiRequestBloc>().state.basicAuthPassword;
+    bearerController.text = context.read<ApiRequestBloc>().state.bearerToken;
   }
 
   @override
@@ -109,6 +115,7 @@ class BasicAuthView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         MyTextfield(
           hint: 'Enter Username',
@@ -144,6 +151,7 @@ class BearerView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         MyTextfield(
           hint: 'Enter Your Token',

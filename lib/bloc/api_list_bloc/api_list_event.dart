@@ -15,6 +15,14 @@ class GetApiList extends ApiListEvent {
   List<Object?> get props => [id];
 }
 
+class DeleteApi extends ApiListEvent {
+  final int id;
+  const DeleteApi({required this.id});
+
+  @override
+  List<Object?> get props => [id];
+}
+
 class CreateNewApi extends ApiListEvent {
   final int collectionID;
   const CreateNewApi({required this.collectionID});

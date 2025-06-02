@@ -15,6 +15,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
   CollectionBloc() : super(const CollectionState()) {
     on<GetCollectionsFromLocalDB>(handleGetCollectionsFromLocalDB);
     on<CreateCollection>(handleCreateCollection);
+    on<DeleteCollection>(handleDeleteCollection);
   }
 
   Future<void> handleGetCollectionsFromLocalDB(
@@ -101,6 +102,48 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
         state.copyWith(
           collectionScreenStatus: CollectionScreenStatus.error,
           message: "Something went wrong!",
+        ),
+      );
+    }
+  }
+
+  FutureOr<void> handleDeleteCollection(
+    DeleteCollection event,
+    Emitter<CollectionState> emit,
+  ) async {
+    emit(
+      state.copyWith(collectionScreenStatus: CollectionScreenStatus.loading),
+    );
+
+    try {
+      String query = '''DELETE FROM collections WHERE id = ?''';
+
+      final res = await databaseService?.executeQuery(
+        sqlQuery: query,
+        arguments: [event.id],
+      );
+
+      if (res == 1) {
+        state.collectionList.removeWhere((element) => element.id == event.id);
+
+        emit(
+          state.copyWith(
+            collectionScreenStatus: CollectionScreenStatus.success,
+          ),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            collectionScreenStatus: CollectionScreenStatus.error,
+            message: "Technical error while deleting the collection!",
+          ),
+        );
+      }
+    } catch (e) {
+      emit(
+        state.copyWith(
+          collectionScreenStatus: CollectionScreenStatus.error,
+          message: "Oops! Something went wrong",
         ),
       );
     }

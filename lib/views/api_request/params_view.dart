@@ -71,6 +71,7 @@ class _ParamsViewState extends State<ParamsView> {
           Flexible(
             child: BlocBuilder<ApiRequestBloc, ApiRequestState>(
               builder: (context, state) {
+                // Utility.showLog("ListView.builder called");
                 return ListView.builder(
                   itemCount: state.params.length,
                   itemBuilder:
@@ -116,7 +117,7 @@ class ParamsListItem extends StatelessWidget {
                 (context) => AddParamsBottomSheet(
                   paramsKey: params.key ?? "",
                   paramsValue: params.value ?? "",
-                  apiID: params.apiId ?? 0,
+                  apiID: params.id ?? 0,
                   isNew: false,
                   isActive: params.isActive == 1 ? true : false,
                 ),

@@ -92,6 +92,13 @@ class _ApiListScreenState extends State<ApiListScreen> {
                                       GetApiList(id: widget.collectionID),
                                     );
                                   },
+                                  onDeleteTap: () {
+                                    apiListBloc.add(
+                                      DeleteApi(
+                                        id: state.apiList[index].id ?? 0,
+                                      ),
+                                    );
+                                  },
                                 ),
                           );
                     },

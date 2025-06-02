@@ -75,7 +75,7 @@ class _ApiRequestViewState extends State<ApiRequestView>
                   onSaveTap: () {
                     if (nameController.text.isNotEmpty) {
                       context.read<ApiRequestBloc>().add(
-                        SaveApiToLocalDB(
+                        SaveApiName(
                           name: nameController.text,
                           apiID: widget.selectedApi?.id ?? 0,
                         ),
@@ -156,7 +156,7 @@ class _ApiRequestViewState extends State<ApiRequestView>
                                       onSaveTap: () {
                                         if (nameController.text.isNotEmpty) {
                                           context.read<ApiRequestBloc>().add(
-                                            SaveApiToLocalDB(
+                                            SaveApiName(
                                               name: nameController.text,
                                               apiID:
                                                   widget.selectedApi?.id ?? 0,
@@ -166,15 +166,18 @@ class _ApiRequestViewState extends State<ApiRequestView>
                                         }
                                       },
                                     ),
-                              ).then((val) {
-                                if (val == true) {
-                                  context.read<ApiRequestBloc>().add(
-                                    LoadSelectedApiData(
-                                      name: nameController.text,
-                                    ),
-                                  );
-                                }
-                              });
+                              );
+
+                              // .then((val) {
+                              //   if (val == true) {
+                              //     context.read<ApiRequestBloc>().add(
+                              //       LoadSelectedApiData(
+                              //         name: nameController.text,
+                              //       ),
+                              //     );
+                              //   }
+                              // }
+                              // );
                             },
                             child: Icon(
                               Icons.edit_note_rounded,
@@ -216,6 +219,9 @@ class _ApiRequestViewState extends State<ApiRequestView>
                 Padding(
                   padding: screenConfig.paddingH,
                   child: BlocBuilder<ApiRequestBloc, ApiRequestState>(
+                    buildWhen:
+                        (previous, current) =>
+                            previous.isGetRequest != current.isGetRequest,
                     builder: (context, state) {
                       Utility.showLog("isGetRequest :: ${state.isGetRequest}");
                       return Row(
@@ -301,7 +307,7 @@ class _ApiRequestViewState extends State<ApiRequestView>
                     controller: tabController,
                     children: [
                       ParamsView(apiID: widget.selectedApi?.id ?? 0),
-                      AuthorizationView(controller: authController),
+                      AuthorizationView(),
                       HeadersView(apiID: widget.selectedApi?.id ?? 0),
                       BodyView(controller: payloadController),
                     ],

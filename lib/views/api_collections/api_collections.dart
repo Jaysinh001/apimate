@@ -139,6 +139,13 @@ class _ApiCollectionsScreenState extends State<ApiCollectionsScreen> {
                                 arguments: state.collectionList[index].id,
                               );
                             },
+                            onDeleteTap: () {
+                              collectionBloc.add(
+                                DeleteCollection(
+                                  id: state.collectionList[index].id ?? 0,
+                                ),
+                              );
+                            },
                           );
                         },
                       );

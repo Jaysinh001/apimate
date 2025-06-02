@@ -21,3 +21,11 @@ class CreateCollection extends CollectionEvent {
   @override
   List<Object?> get props => [name];
 }
+
+class DeleteCollection extends CollectionEvent {
+  final int id;
+  const DeleteCollection({required this.id});
+
+  @override
+  List<Object?> get props => [id];
+}

@@ -15,6 +15,7 @@ class ApiListBloc extends Bloc<ApiListEvent, ApiListState> {
   ApiListBloc() : super(const ApiListState()) {
     on<GetApiList>(handleGetApiList);
     on<CreateNewApi>(handleCreateNewApi);
+    on<DeleteApi>(handleDeleteApi);
   }
 
   FutureOr<void> handleGetApiList(
@@ -98,6 +99,41 @@ class ApiListBloc extends Bloc<ApiListEvent, ApiListState> {
       }
     } catch (e) {
       Utility.showLog("handleCreateNewApi Exception ::: $e");
+
+      emit(
+        state.copyWith(
+          apiListStatus: ApiListStatus.error,
+          message: "Something went wrong!",
+        ),
+      );
+    }
+  }
+
+  FutureOr<void> handleDeleteApi(
+    DeleteApi event,
+    Emitter<ApiListState> emit,
+  ) async {
+    emit(state.copyWith(apiListStatus: ApiListStatus.loading));
+
+    try {
+      final query = '''DELETE FROM apis WHERE id = ?''';
+
+      final res = await databaseService?.executeQuery(
+        sqlQuery: query,
+        arguments: [
+          event.id, // api id
+        ],
+      );
+
+      if (res == 1) {
+        state.apiList.removeWhere((element) => element.id == event.id);
+
+        emit(state.copyWith(apiListStatus: ApiListStatus.success));
+      }
+
+      emit(state.copyWith(apiListStatus: ApiListStatus.success));
+    } catch (e) {
+      Utility.showLog("handleGetApiList Exception ::: $e");
 
       emit(
         state.copyWith(

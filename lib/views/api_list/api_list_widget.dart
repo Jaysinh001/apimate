@@ -6,6 +6,7 @@ import '../../config/utility/screen_config.dart';
 
 class ApiListTile extends StatelessWidget {
   final VoidCallback? onTap;
+  final VoidCallback? onDeleteTap;
   final String name;
   final String method;
   final String url;
@@ -13,6 +14,7 @@ class ApiListTile extends StatelessWidget {
   const ApiListTile({
     super.key,
     this.onTap,
+    this.onDeleteTap,
     required this.name,
     required this.method,
     required this.url,
@@ -40,6 +42,9 @@ class ApiListTile extends StatelessWidget {
           child: Padding(
             padding: screenConfig.paddingH,
             child: ListTile(
+              contentPadding: EdgeInsets.fromLTRB(4, 2, 8, 2),
+              horizontalTitleGap: 12,
+              minLeadingWidth: 36,
               leading: MyText.bodyMedium(
                 method,
                 style: TextStyle(
@@ -63,10 +68,16 @@ class ApiListTile extends StatelessWidget {
                           .secondary,
                 ),
               ),
-              trailing: Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.white,
-                size: 15,
+              trailing: GestureDetector(
+                onTap: onDeleteTap,
+                child: Icon(
+                  Icons.delete,
+                  color:
+                      AppColors()
+                          .getCurrentColorScheme(context: context)
+                          .primary,
+                  size: 20,
+                ),
               ),
             ),
           ),
