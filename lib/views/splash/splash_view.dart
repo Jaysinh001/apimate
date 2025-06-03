@@ -41,6 +41,8 @@ class _SplashViewState extends State<SplashView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: MyText.bodyLarge("API Mate")));
+    return Scaffold(
+      body: Center(child: Image.asset("assets/images/apimate_name_logo.png")),
+    );
   }
 }
