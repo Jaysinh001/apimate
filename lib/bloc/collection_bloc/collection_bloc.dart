@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:apimate/data/services/database_service.dart';
 import 'package:apimate/main.dart';
-import 'package:apimate/views/api_collections/add_collection_bottomsheet.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
@@ -123,6 +121,10 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
     );
 
     if (result != null) {
+      emit(
+        state.copyWith(collectionScreenStatus: CollectionScreenStatus.loading),
+      );
+
       File file = File(result.files.single.path ?? '');
 
       final content = await file.readAsString();
@@ -181,12 +183,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
 
           headerBatch?.commit();
 
-          emit(
-            state.copyWith(
-              collectionScreenStatus: CollectionScreenStatus.success,
-              message: "Collection Imported Successfully!",
-            ),
-          );
+          add(GetCollectionsFromLocalDB());
         } else {
           emit(
             state.copyWith(
