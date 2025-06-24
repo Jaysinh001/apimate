@@ -4,6 +4,7 @@ import 'package:apimate/bloc/collection_bloc/collection_bloc.dart';
 import 'package:apimate/config/utility/utility.dart';
 import 'package:apimate/data/services/database_service.dart';
 import 'package:flutter/material.dart';
+import 'package:upgrader/upgrader.dart';
 
 import 'bloc/theme_bloc/theme_bloc.dart';
 import 'config/routes/routes.dart';
@@ -48,9 +49,11 @@ class MyApp extends StatelessWidget {
                 maxScaleFactor: 1.2, // Maximum scale factor allowed.
               );
 
-              return MediaQuery(
-                data: mediaQueryData.copyWith(textScaler: scale),
-                child: child!,
+              return UpgradeAlert(
+                child: MediaQuery(
+                  data: mediaQueryData.copyWith(textScaler: scale),
+                  child: child!,
+                ),
               );
             },
             title: 'Apimate',

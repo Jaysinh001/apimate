@@ -38,7 +38,7 @@ class Utility {
   }
 
   static void showLog(String message) {
-    log(message);
+    // log(message);
   }
 
   static String formatDateTime({
