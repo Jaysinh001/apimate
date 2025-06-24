@@ -29,3 +29,7 @@ class DeleteCollection extends CollectionEvent {
   @override
   List<Object?> get props => [id];
 }
+
+class ImportCollectionFile extends CollectionEvent {
+  const ImportCollectionFile();
+}
