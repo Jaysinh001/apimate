@@ -1,5 +1,7 @@
 part of 'collection_bloc.dart';
 
+
+
 class CollectionEvent extends Equatable {
   const CollectionEvent();
 
@@ -28,4 +30,8 @@ class DeleteCollection extends CollectionEvent {
 
   @override
   List<Object?> get props => [id];
+}
+
+class ImportCollectionFile extends CollectionEvent {
+  const ImportCollectionFile();
 }

@@ -35,7 +35,9 @@ class AddCollectionBottomsheet extends StatelessWidget {
               Utility.showLog("New Collection add button clicked!!");
 
               if (collectionName.text.isNotEmpty) {
-                context.read<CollectionBloc>().add(CreateCollection(name: collectionName.text));
+                context.read<CollectionBloc>().add(
+                  CreateCollection(name: collectionName.text),
+                );
               } else {
                 Utility.showToastMessage(
                   "Collection Name Should Not Be Empty",
@@ -44,6 +46,27 @@ class AddCollectionBottomsheet extends StatelessWidget {
               }
             },
             title: "Add",
+          ),
+        ),
+
+        Row(
+          children: [
+            Expanded(child: Divider(indent: 16, endIndent: 16)),
+            MyText.bodyMedium("OR"),
+            Expanded(child: Divider(indent: 16, endIndent: 16)),
+          ],
+        ),
+
+        Padding(
+          padding: screenConfig.padding,
+          child: MyBtn(
+            onBtnTap: () {
+              Utility.showLog("Import Collection add button clicked!!");
+
+              context.read<CollectionBloc>().add(ImportCollectionFile());
+              Navigator.pop(context); // Closing the bottomsheet
+            },
+            title: "Import Collection File",
           ),
         ),
       ],
