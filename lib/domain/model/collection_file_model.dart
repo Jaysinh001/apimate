@@ -75,19 +75,22 @@ class Item {
   final List<dynamic>? item;
   final Request? request;
   final List<dynamic>? response;
+  final List<Event>? event;
 
-  Item({this.name, this.item, this.request, this.response});
+  Item({this.name, this.item, this.request, this.response, this.event});
 
   Item copyWith({
     String? name,
     List<dynamic>? item,
     Request? request,
     List<dynamic>? response,
+    List<Event>? event,
   }) => Item(
     name: name ?? this.name,
     item: item ?? this.item,
     request: request ?? this.request,
     response: response ?? this.response,
+    event: event ?? this.event,
   );
 
   factory Item.fromJson(Map<String, dynamic> json) => Item(
@@ -101,6 +104,10 @@ class Item {
         json["response"] == null
             ? []
             : List<dynamic>.from(json["response"]!.map((x) => x)),
+    event:
+        json["event"] == null
+            ? []
+            : List<Event>.from(json["event"]!.map((x) => Event.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
@@ -109,27 +116,75 @@ class Item {
     "request": request?.toJson(),
     "response":
         response == null ? [] : List<dynamic>.from(response!.map((x) => x)),
+    "event":
+        event == null ? [] : List<dynamic>.from(event!.map((x) => x.toJson())),
+  };
+}
+
+class Event {
+  final String? listen;
+  final Script? script;
+
+  Event({this.listen, this.script});
+
+  Event copyWith({String? listen, Script? script}) =>
+      Event(listen: listen ?? this.listen, script: script ?? this.script);
+
+  factory Event.fromJson(Map<String, dynamic> json) => Event(
+    listen: json["listen"],
+    script: json["script"] == null ? null : Script.fromJson(json["script"]),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "listen": listen,
+    "script": script?.toJson(),
+  };
+}
+
+class Script {
+  final List<String>? exec;
+  final String? type;
+
+  Script({this.exec, this.type});
+
+  Script copyWith({List<String>? exec, String? type}) =>
+      Script(exec: exec ?? this.exec, type: type ?? this.type);
+
+  factory Script.fromJson(Map<String, dynamic> json) => Script(
+    exec:
+        json["exec"] == null
+            ? []
+            : List<String>.from(json["exec"]!.map((x) => x)),
+    type: json["type"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "exec": exec == null ? [] : List<dynamic>.from(exec!.map((x) => x)),
+    "type": type,
   };
 }
 
 class Request {
   final Auth? auth;
   final String? method;
-  final List<dynamic>? header;
+  final List<Header>? header;
   final Url? url;
+  final Body? body;
 
-  Request({this.auth, this.method, this.header, this.url});
+  Request({this.auth, this.method, this.header, this.url, this.body});
 
   Request copyWith({
     Auth? auth,
     String? method,
-    List<dynamic>? header,
+    List<Header>? header,
     Url? url,
+    Body? body,
   }) => Request(
     auth: auth ?? this.auth,
     method: method ?? this.method,
     header: header ?? this.header,
     url: url ?? this.url,
+    body: body ?? this.body,
   );
 
   factory Request.fromJson(Map<String, dynamic> json) => Request(
@@ -138,25 +193,30 @@ class Request {
     header:
         json["header"] == null
             ? []
-            : List<dynamic>.from(json["header"]!.map((x) => x)),
+            : List<Header>.from(json["header"]!.map((x) => Header.fromJson(x))),
     url: json["url"] == null ? null : Url.fromJson(json["url"]),
+    body: json["body"] == null ? null : Body.fromJson(json["body"]),
   );
 
   Map<String, dynamic> toJson() => {
     "auth": auth?.toJson(),
     "method": method,
-    "header": header == null ? [] : List<dynamic>.from(header!.map((x) => x)),
+    "header":
+        header == null
+            ? []
+            : List<dynamic>.from(header!.map((x) => x.toJson())),
     "url": url?.toJson(),
+    "body": body?.toJson(),
   };
 }
 
 class Auth {
   final String? type;
-  final List<Basic>? basic;
+  final List<Header>? basic;
 
   Auth({this.type, this.basic});
 
-  Auth copyWith({String? type, List<Basic>? basic}) =>
+  Auth copyWith({String? type, List<Header>? basic}) =>
       Auth(type: type ?? this.type, basic: basic ?? this.basic);
 
   factory Auth.fromJson(Map<String, dynamic> json) => Auth(
@@ -164,7 +224,7 @@ class Auth {
     basic:
         json["basic"] == null
             ? []
-            : List<Basic>.from(json["basic"]!.map((x) => Basic.fromJson(x))),
+            : List<Header>.from(json["basic"]!.map((x) => Header.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
@@ -174,23 +234,51 @@ class Auth {
   };
 }
 
-class Basic {
+class Header {
   final String? key;
   final String? value;
   final String? type;
 
-  Basic({this.key, this.value, this.type});
+  Header({this.key, this.value, this.type});
 
-  Basic copyWith({String? key, String? value, String? type}) => Basic(
+  Header copyWith({String? key, String? value, String? type}) => Header(
     key: key ?? this.key,
     value: value ?? this.value,
     type: type ?? this.type,
   );
 
-  factory Basic.fromJson(Map<String, dynamic> json) =>
-      Basic(key: json["key"], value: json["value"], type: json["type"]);
+  factory Header.fromJson(Map<String, dynamic> json) =>
+      Header(key: json["key"], value: json["value"], type: json["type"]);
 
   Map<String, dynamic> toJson() => {"key": key, "value": value, "type": type};
+}
+
+class Body {
+  final String? mode;
+  final List<Header>? formdata;
+
+  Body({this.mode, this.formdata});
+
+  Body copyWith({String? mode, List<Header>? formdata}) =>
+      Body(mode: mode ?? this.mode, formdata: formdata ?? this.formdata);
+
+  factory Body.fromJson(Map<String, dynamic> json) => Body(
+    mode: json["mode"],
+    formdata:
+        json["formdata"] == null
+            ? []
+            : List<Header>.from(
+              json["formdata"]!.map((x) => Header.fromJson(x)),
+            ),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "mode": mode,
+    "formdata":
+        formdata == null
+            ? []
+            : List<dynamic>.from(formdata!.map((x) => x.toJson())),
+  };
 }
 
 class Url {

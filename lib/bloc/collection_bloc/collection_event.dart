@@ -1,5 +1,7 @@
 part of 'collection_bloc.dart';
 
+
+
 class CollectionEvent extends Equatable {
   const CollectionEvent();
 

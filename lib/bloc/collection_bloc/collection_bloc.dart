@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:apimate/data/services/database_service.dart';
 import 'package:apimate/main.dart';
 import 'package:apimate/views/api_collections/add_collection_bottomsheet.dart';
 import 'package:bloc/bloc.dart';
@@ -34,7 +35,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
     try {
       final query = '''SELECT * FROM collections''';
 
-      final res = await databaseService?.executeQuery(sqlQuery: query); 
+      final res = await databaseService?.executeQuery(sqlQuery: query);
 
       Utility.showLog("handleGetCollectionsFromLocalDB ::: $res");
 
@@ -92,8 +93,6 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
         );
 
         add(GetCollectionsFromLocalDB());
-
-
       } else {
         emit(
           state.copyWith(
@@ -133,9 +132,69 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
       final importResponse = collectionFileModelFromJson(content);
 
       if (importResponse.info != null) {
-        add(
-          CreateCollection(name: importResponse.info?.name ?? 'New Collection'),
+        final now = DateTime.now().toIso8601String();
+
+        // First Inserting the collection.
+        final query =
+            '''INSERT INTO collections (name, created_at, updated_at) VALUES (?, ?, ?)''';
+
+        final res = await databaseService?.executeQuery(
+          sqlQuery: query,
+          arguments: [importResponse.info?.name ?? "New Collection", now, now],
         );
+
+        if (res is int && res > 0) {
+          final db = await databaseService?.database;
+          final apiBatch = db?.batch();
+          final headerBatch = db?.batch();
+
+          for (Item item in importResponse.item ?? []) {
+            final method = item.request?.method ?? "GET";
+            final apiUrl = item.request?.url?.raw ?? '';
+            final apiName = item.name ?? 'Untitled Api';
+
+            apiBatch?.insert("apis", {
+              "collection_id": res,
+              "name": apiName,
+              "method": method,
+              "url": apiUrl,
+              "created_at": now,
+              "updated_at": now,
+            });
+          }
+
+          final insertedApis = await apiBatch?.commit();
+
+          for (int i = 0; i < (insertedApis?.length ?? 0); i++) {
+            List<Header>? headers = importResponse.item?[i].request?.header;
+            // >> Need to do changes in database structure to handle this.
+            // Body? body = importResponse.item?[i].request?.body;
+
+            for (Header h in headers ?? []) {
+              headerBatch?.insert("headers", {
+                'api_id': insertedApis?[i],
+                'key': h.key ?? '',
+                'value': h.value ?? '',
+              });
+            }
+          }
+
+          headerBatch?.commit();
+
+          emit(
+            state.copyWith(
+              collectionScreenStatus: CollectionScreenStatus.success,
+              message: "Collection Imported Successfully!",
+            ),
+          );
+        } else {
+          emit(
+            state.copyWith(
+              collectionScreenStatus: CollectionScreenStatus.error,
+              message: "Technical error while importing the collection!",
+            ),
+          );
+        }
       }
     } else {
       // User canceled the picker
