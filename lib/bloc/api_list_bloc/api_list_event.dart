@@ -30,3 +30,11 @@ class CreateNewApi extends ApiListEvent {
   @override
   List<Object?> get props => [collectionID];
 }
+
+class FilterApiList extends ApiListEvent {
+  final String txt;
+  const FilterApiList({required this.txt});
+
+  @override
+  List<Object?> get props => [txt];
+}

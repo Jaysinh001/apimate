@@ -6,6 +6,8 @@ import 'package:apimate/views/api_list/api_list_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../config/components/my_searchbar.dart';
+import '../../config/utility/screen_config.dart';
 import '../../config/utility/utility.dart';
 import '../../domain/model/get_api_list_model.dart';
 
@@ -32,8 +34,11 @@ class _ApiListScreenState extends State<ApiListScreen> {
     apiListBloc.add(GetApiList(id: widget.collectionID));
   }
 
+  bool isVisible = true;
+
   @override
   Widget build(BuildContext context) {
+    ScreenConfig screenConfig = ScreenConfig(context);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -48,7 +53,26 @@ class _ApiListScreenState extends State<ApiListScreen> {
             onRefresh: _onRefresh,
             child: Column(
               children: [
-                MyNavbar(title: "API List"),
+                MyNavbar(
+                  title: "API List",
+                  trailing: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isVisible = !isVisible;
+                        });
+                      },
+                      child:
+                          isVisible
+                              ? const Icon(Icons.cancel_outlined)
+                              : Icon(Icons.search_rounded),
+                    ),
+                  ),
+                ),
+
+                MySearchbar(isVisible: isVisible, margin: screenConfig.padding),
+
                 Expanded(
                   child: BlocConsumer<ApiListBloc, ApiListState>(
                     listener: (context, state) async {

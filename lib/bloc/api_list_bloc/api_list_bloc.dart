@@ -16,6 +16,9 @@ class ApiListBloc extends Bloc<ApiListEvent, ApiListState> {
     on<GetApiList>(handleGetApiList);
     on<CreateNewApi>(handleCreateNewApi);
     on<DeleteApi>(handleDeleteApi);
+    on<DeleteApi>(handleDeleteApi);
+    on<FilterApiList>(handleFilterApiList);
+
   }
 
   FutureOr<void> handleGetApiList(
@@ -142,5 +145,12 @@ class ApiListBloc extends Bloc<ApiListEvent, ApiListState> {
         ),
       );
     }
+  }
+
+  FutureOr<void> handleFilterApiList(FilterApiList event, Emitter<ApiListState> emit) {
+
+
+
+    
   }
 }
