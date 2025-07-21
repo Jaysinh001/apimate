@@ -16,9 +16,7 @@ class ApiListBloc extends Bloc<ApiListEvent, ApiListState> {
     on<GetApiList>(handleGetApiList);
     on<CreateNewApi>(handleCreateNewApi);
     on<DeleteApi>(handleDeleteApi);
-    on<DeleteApi>(handleDeleteApi);
     on<FilterApiList>(handleFilterApiList);
-
   }
 
   FutureOr<void> handleGetApiList(
@@ -44,7 +42,11 @@ class ApiListBloc extends Bloc<ApiListEvent, ApiListState> {
       Utility.showLog("getApiListModelFromJson ::: $apiList");
 
       emit(
-        state.copyWith(apiListStatus: ApiListStatus.success, apiList: apiList),
+        state.copyWith(
+          apiListStatus: ApiListStatus.success,
+          apiList: apiList,
+          filterApiList: apiList,
+        ),
       );
     } catch (e) {
       Utility.showLog("handleGetApiList Exception ::: $e");
@@ -147,10 +149,32 @@ class ApiListBloc extends Bloc<ApiListEvent, ApiListState> {
     }
   }
 
-  FutureOr<void> handleFilterApiList(FilterApiList event, Emitter<ApiListState> emit) {
+  FutureOr<void> handleFilterApiList(
+    FilterApiList event,
+    Emitter<ApiListState> emit,
+  ) {
+    String query = event.txt.toLowerCase();
 
+    if (query.isNotEmpty) {
+      var list = state.apiList.where(
+        (api) =>
+            (api.name?.toLowerCase().contains(query) ?? false) ||
+            (api.url?.toLowerCase().contains(query) ?? false),
+      );
+      emit(
+        state.copyWith(
+          apiListStatus: ApiListStatus.success,
 
-
-    
+          filterApiList: List.of(list),
+        ),
+      );
+    } else {
+      emit(
+        state.copyWith(
+          apiListStatus: ApiListStatus.success,
+          filterApiList: state.apiList,
+        ),
+      );
+    }
   }
 }

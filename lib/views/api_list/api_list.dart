@@ -71,7 +71,14 @@ class _ApiListScreenState extends State<ApiListScreen> {
                   ),
                 ),
 
-                MySearchbar(isVisible: isVisible, margin: screenConfig.padding),
+                MySearchbar(
+                  isVisible: isVisible,
+                  margin: screenConfig.padding,
+
+                  onChange: (p0) {
+                    apiListBloc.add(FilterApiList(txt: p0));
+                  },
+                ),
 
                 Expanded(
                   child: BlocConsumer<ApiListBloc, ApiListState>(
@@ -95,17 +102,18 @@ class _ApiListScreenState extends State<ApiListScreen> {
                       return state.apiList.isEmpty
                           ? NoDataWidget()
                           : ListView.builder(
-                            itemCount: state.apiList.length,
+                            itemCount: state.filterApiList.length,
                             itemBuilder:
                                 (context, index) => ApiListTile(
-                                  name: state.apiList[index].name ?? '',
-                                  url: state.apiList[index].url ?? '',
-                                  method: state.apiList[index].method ?? '',
+                                  name: state.filterApiList[index].name ?? '',
+                                  url: state.filterApiList[index].url ?? '',
+                                  method:
+                                      state.filterApiList[index].method ?? '',
                                   onTap: () async {
                                     await Navigator.pushNamed(
                                       context,
                                       RoutesName.apiRequestView,
-                                      arguments: state.apiList[index],
+                                      arguments: state.filterApiList[index],
                                     );
 
                                     Utility.showLog("After Navigator");
@@ -119,7 +127,7 @@ class _ApiListScreenState extends State<ApiListScreen> {
                                   onDeleteTap: () {
                                     apiListBloc.add(
                                       DeleteApi(
-                                        id: state.apiList[index].id ?? 0,
+                                        id: state.filterApiList[index].id ?? 0,
                                       ),
                                     );
                                   },
