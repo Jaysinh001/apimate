@@ -8,8 +8,10 @@ import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
 
 import '../../config/utility/utility.dart' show Utility;
-import '../../domain/model/collection_file_model.dart';
+// import '../../domain/model/collection_file_model.dart';
 import '../../domain/model/collection_list_model.dart';
+import '../../domain/model/import_collection_model/raw_import_model.dart';
+import '../../domain/model/postman_collection_models.dart';
 
 part 'collection_event.dart';
 part 'collection_state.dart';
@@ -115,10 +117,14 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
     ImportCollectionFile event,
     Emitter<CollectionState> emit,
   ) async {
+    Utility.showLog("handleImportCollectionFile 1");
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['json'],
     );
+    Utility.showLog("handleImportCollectionFile 2 : ${result?.count}");
+
+    PostmanCollection collection = PostmanCollection();
 
     if (result != null) {
       emit(
@@ -129,73 +135,127 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
 
       final content = await file.readAsString();
 
-      Utility.showLog("Picked File : $content");
+      // MARK: IMPORT STEP 1
+      // Firstly we will parse the json string into lossless mental models
+      // Flow will be JSON String --> Map<String, dynamic> --> PostmanCollection model.
+      try {
+        final Map<String, dynamic> jsonMap = jsonDecode(content);
+        collection = PostmanCollection.fromJson(jsonMap);
 
-      final importResponse = collectionFileModelFromJson(content);
-
-      if (importResponse.info != null) {
-        final now = DateTime.now().toIso8601String();
-
-        // First Inserting the collection.
-        final query =
-            '''INSERT INTO collections (name, created_at, updated_at) VALUES (?, ?, ?)''';
-
-        final res = await databaseService?.executeQuery(
-          sqlQuery: query,
-          arguments: [importResponse.info?.name ?? "New Collection", now, now],
+        Utility.showLog("collection.info : ${collection.info}\n");
+      } catch (e) {
+        Utility.showLog(
+          "Technical error while Parsing the collection to raw models!\n${e.toString()}",
         );
 
-        if (res is int && res > 0) {
-          final db = await databaseService?.database;
-          final apiBatch = db?.batch();
-          final headerBatch = db?.batch();
-
-          for (Item item in importResponse.item ?? []) {
-            final method = item.request?.method ?? "GET";
-            final apiUrl = item.request?.url?.raw ?? '';
-            final apiName = item.name ?? 'Untitled Api';
-
-            apiBatch?.insert("apis", {
-              "collection_id": res,
-              "name": apiName,
-              "method": method,
-              "url": apiUrl,
-              "created_at": now,
-              "updated_at": now,
-            });
-          }
-
-          final insertedApis = await apiBatch?.commit();
-
-          for (int i = 0; i < (insertedApis?.length ?? 0); i++) {
-            List<Header>? headers = importResponse.item?[i].request?.header;
-            // >> Need to do changes in database structure to handle this.
-            // Body? body = importResponse.item?[i].request?.body;
-
-            for (Header h in headers ?? []) {
-              headerBatch?.insert("headers", {
-                'api_id': insertedApis?[i],
-                'key': h.key ?? '',
-                'value': h.value ?? '',
-              });
-            }
-          }
-
-          headerBatch?.commit();
-
-          add(GetCollectionsFromLocalDB());
-        } else {
-          emit(
-            state.copyWith(
-              collectionScreenStatus: CollectionScreenStatus.error,
-              message: "Technical error while importing the collection!",
-            ),
-          );
-        }
+        emit(
+          state.copyWith(
+            collectionScreenStatus: CollectionScreenStatus.error,
+            message:
+                "Technical error while Parsing the collection to raw models!",
+          ),
+        );
       }
+
+      // MARK: IMPORT STEP 2
+      // In Postman schema:
+      //   1. A folder = item has item[] children
+      //   2. A request = item has request
+      // NOTE: An item can never be both
+
+      
+
+      traverseItems(items: collection.item);
+
+       Utility.showLog("Folders: ${state.importFolderCount}");
+      Utility.showLog("Requests: ${state.importRequestCount}");
+
+     
+
+      
+
+     
+
+      // Utility.showLog("Picked File : $content");
+
+      //   Utility.showLog("handleImportCollectionFile 3");
+
+      //   final importResponse = postmanCollectionFromJson(content);
+      //   Utility.showLog("handleImportCollectionFile 4");
+
+      //   if (importResponse.info != null) {
+      //     final now = DateTime.now().toIso8601String();
+
+      //     // First Inserting the collection.
+      //     final query =
+      //         '''INSERT INTO collections (name, created_at, updated_at) VALUES (?, ?, ?)''';
+
+      //     final res = await databaseService?.executeQuery(
+      //       sqlQuery: query,
+      //       arguments: [importResponse.info?.name ?? "New Collection", now, now],
+      //     );
+
+      //     Utility.showLog("Collection Created with result : $res");
+
+      //     if (res is int && res > 0) {
+      //       final db = await databaseService?.database;
+      //       final apiBatch = db?.batch();
+      //       final headerBatch = db?.batch();
+
+      //       for (Item item in importResponse.item ?? []) {
+      //         final method = item.request?.method ?? "GET";
+      //         final apiUrl = item.request?.url?.raw ?? '';
+      //         final apiName = item.name ?? 'Untitled Api';
+
+      //         apiBatch?.insert("apis", {
+      //           "collection_id": res,
+      //           "name": apiName,
+      //           "method": method,
+      //           "url": apiUrl,
+      //           "created_at": now,
+      //           "updated_at": now,
+      //         });
+      //       }
+
+      //       final insertedApis = await apiBatch?.commit();
+
+      //       for (int i = 0; i < (insertedApis?.length ?? 0); i++) {
+      //         List<Header>? headers = importResponse.item?[i].request?.header;
+      //         // >> Need to do changes in database structure to handle this.
+      //         // Body? body = importResponse.item?[i].request?.body;
+
+      //         for (Header h in headers ?? []) {
+      //           headerBatch?.insert("headers", {
+      //             'api_id': insertedApis?[i],
+      //             'key': h.key ?? '',
+      //             'value': h.value ?? '',
+      //           });
+      //         }
+      //       }
+
+      //       headerBatch?.commit();
+
+      //       add(GetCollectionsFromLocalDB());
+      //     } else {
+      //       emit(
+      //         state.copyWith(
+      //           collectionScreenStatus: CollectionScreenStatus.error,
+      //           message: "Technical error while importing the collection!",
+      //         ),
+      //       );
+      //     }
+      //   }
     } else {
       // User canceled the picker
     }
+
+    // temporary to remove loader
+    // emit(
+    //   state.copyWith(
+    //     collectionScreenStatus: CollectionScreenStatus.error,
+    //     message: "Technical error while importing the collection!",
+    //   ),
+    // );
   }
 
   FutureOr<void> handleDeleteCollection(
@@ -238,5 +298,33 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
         ),
       );
     }
+  }
+
+ traverseItems({
+    List<PostmanItem>? items,
+    
+  }) {
+    if (items == null) {
+      return null;
+    }
+
+    for (final item in items) {
+      // 📁 Folder
+      if (item.isFolder) {
+        state.copyWith(importFolderCount: state.importFolderCount + 1);
+        traverseItems(items: item.item);
+      }
+
+      // 🔗 Request
+      if (item.isRequest) {
+       state.copyWith(importRequestCount: state.importRequestCount + 1);
+
+        final method = item.request?.method?.toUpperCase() ?? 'UNKNOWN';
+        // state.importMethodCount.update(method, () => state.importMethodCount[method] + 1)
+        // state.copyWith(importMethodCount: );
+
+      }
+    }
+
   }
 }
