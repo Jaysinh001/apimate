@@ -44,7 +44,7 @@ class PostmanInfo {
   final dynamic version;
   final String? schema;
 
-  PostmanInfo({
+  const PostmanInfo({
     this.name,
     this.postmanId,
     this.description,

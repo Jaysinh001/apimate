@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../config/components/my_bottomsheet.dart';
+import '../../config/routes/routes_name.dart';
 
 class AddCollectionBottomsheet extends StatelessWidget {
   AddCollectionBottomsheet({super.key});
@@ -63,8 +64,10 @@ class AddCollectionBottomsheet extends StatelessWidget {
             onBtnTap: () {
               Utility.showLog("Import Collection add button clicked!!");
 
-              context.read<CollectionBloc>().add(ImportCollectionFile());
-              Navigator.pop(context); // Closing the bottomsheet
+              // context.read<CollectionBloc>().add(ImportCollectionFile());
+              // Navigator.pop(context); // Closing the bottomsheet
+
+              Navigator.pushNamed(context, RoutesName.importCollectionView);
             },
             title: "Import Collection File",
           ),
