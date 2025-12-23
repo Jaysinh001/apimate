@@ -1,5 +1,6 @@
 import 'package:apimate/views/api_collections/api_collections.dart';
 import 'package:apimate/views/api_list/api_list.dart';
+import 'package:apimate/views/import_collection/import_collection_view.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -21,6 +22,10 @@ class Routes {
       case RoutesName.apiCollections:
         return MaterialPageRoute(
           builder: (context) => const ApiCollectionsScreen(),
+        );
+      case RoutesName.importCollectionView:
+        return MaterialPageRoute(
+          builder: (context) => const ImportCollectionView(),
         );
       case RoutesName.apiList:
         return MaterialPageRoute(

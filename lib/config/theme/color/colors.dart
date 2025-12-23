@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bloc/theme_bloc/theme_bloc.dart';
-import '../../../data/services/shared_preference_manager.dart';
 
 class AppColors {
   static const dracula = _DraculaColors();

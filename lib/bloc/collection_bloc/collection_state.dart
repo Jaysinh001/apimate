@@ -38,14 +38,8 @@ class CollectionState extends Equatable {
   );
 
 
-  // GETTERS for IMPORT FEILDS
-  int get folderCount => importFolderCount; 
-  int get requestCount => importRequestCount; 
-  Map<String, int> get methodCount => importMethodCount; 
-
-
   @override
-  List<Object?> get props => [collectionScreenStatus, collectionList, message];
+  List<Object?> get props => [collectionScreenStatus, collectionList, importFolderCount , importFolderCount , importMethodCount,  message];
 }
 
 

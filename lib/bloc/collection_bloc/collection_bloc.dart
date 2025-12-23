@@ -163,18 +163,14 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
       //   2. A request = item has request
       // NOTE: An item can never be both
 
+      Map<String, int> stats = {"folders": 0, "requests": 0};
+
+      traverseItems(items: collection.item, stats: stats,);
+
+      Utility.showLog("Updated Stats : $stats");
+
+      emit(state.copyWith(importFolderCount: stats["folders"] , importRequestCount: stats["requests"] ,  ));
       
-
-      traverseItems(items: collection.item);
-
-       Utility.showLog("Folders: ${state.importFolderCount}");
-      Utility.showLog("Requests: ${state.importRequestCount}");
-
-     
-
-      
-
-     
 
       // Utility.showLog("Picked File : $content");
 
@@ -300,31 +296,30 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
     }
   }
 
- traverseItems({
+  void traverseItems({
     List<PostmanItem>? items,
-    
+    Map<String, int>? stats,
   }) {
-    if (items == null) {
-      return null;
-    }
+    if (items == null) return;
 
     for (final item in items) {
       // 📁 Folder
       if (item.isFolder) {
-        state.copyWith(importFolderCount: state.importFolderCount + 1);
-        traverseItems(items: item.item);
+        stats?["folders"] = (stats["folders"] ?? 0) + 1;
+        traverseItems(items: item.item, stats: stats,);
       }
 
       // 🔗 Request
       if (item.isRequest) {
-       state.copyWith(importRequestCount: state.importRequestCount + 1);
+        stats?["requests"] = (stats["requests"] ?? 0) + 1;
+
+        // stats.requestCount++;
 
         final method = item.request?.method?.toUpperCase() ?? 'UNKNOWN';
-        // state.importMethodCount.update(method, () => state.importMethodCount[method] + 1)
-        // state.copyWith(importMethodCount: );
+        stats?[method] = (stats[method] ?? 0) + 1;
 
+        // stats.methodCount[method] = (stats.methodCount[method] ?? 0) + 1;
       }
     }
-
   }
 }
