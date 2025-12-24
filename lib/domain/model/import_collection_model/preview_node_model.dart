@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'raw_import_model.dart';
+
 enum PreviewNodeType { folder, request }
 
 class ImportPreviewNode extends Equatable {
@@ -8,6 +10,8 @@ class ImportPreviewNode extends Equatable {
 
   // Request-only
   final String? method;
+    final PostmanRequest? postmanRequest;
+
 
   // Folder-only
   final List<ImportPreviewNode>? children;
@@ -16,9 +20,10 @@ class ImportPreviewNode extends Equatable {
     required this.type,
     required this.name,
     this.method,
+    this.postmanRequest,
     this.children,
   });
 
   @override
-  List<Object?> get props => [type, name, method, children];
+  List<Object?> get props => [type, name, method,postmanRequest, children];
 }

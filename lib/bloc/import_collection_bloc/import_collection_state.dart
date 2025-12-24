@@ -1,6 +1,6 @@
 part of 'import_collection_bloc.dart';
 
-enum ImportCollectionScreenStatus { initial, loading, preview, error }
+enum ImportCollectionScreenStatus { initial, loading, preview, error , imported }
 
 class ImportCollectionState extends Equatable {
   final ImportCollectionScreenStatus status;

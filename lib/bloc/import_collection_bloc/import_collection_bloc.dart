@@ -113,19 +113,35 @@ class ImportCollectionBloc
 
       ImportCollectionRepo repo = ImportCollectionRepo();
 
-     int res = await repo.importCollection(
+      final res = await repo.importCollection(
         collectionName: state.postmanInfo.name ?? 'UNKNOWN',
         description: state.postmanInfo.description,
         previewTree: state.previewTree,
       );
-
       Utility.showLog("handleImportDataToLocalStorage res : $res");
-      
-
-
+      if (res > 0) {
+        emit(
+          state.copyWith(
+            status: ImportCollectionScreenStatus.imported,
+            message: "Failed to import collection into local storage!",
+          ),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            status: ImportCollectionScreenStatus.error,
+            message: "Something went wrong while inserting the data",
+          ),
+        );
+      }
     } catch (e) {
+      emit(
+        state.copyWith(
+          status: ImportCollectionScreenStatus.error,
+          message: "Failed to insert the collection into local storage",
+        ),
+      );
       Utility.showLog("handleImportDataToLocalStorage Exception : $e");
-
     }
   }
 
@@ -147,6 +163,7 @@ class ImportCollectionBloc
         type: PreviewNodeType.request,
         name: item.name ?? 'Unnamed Request',
         method: item.request?.method?.toUpperCase() ?? 'UNKNOWN',
+        postmanRequest: item.request,
       );
     }).toList();
   }
@@ -165,12 +182,8 @@ class ImportCollectionBloc
       if (item.isRequest) {
         stats?["requests"] = (stats["requests"] ?? 0) + 1;
 
-        // stats.requestCount++;
-
         final method = item.request?.method?.toUpperCase() ?? 'UNKNOWN';
         stats?[method] = (stats[method] ?? 0) + 1;
-
-        // stats.methodCount[method] = (stats.methodCount[method] ?? 0) + 1;
       }
     }
   }

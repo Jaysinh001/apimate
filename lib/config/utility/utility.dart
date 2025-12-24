@@ -12,6 +12,10 @@ import '../theme/color/colors.dart';
 // import '../theme/color/colors.dart';
 
 class Utility {
+  // Add these static variables
+  static const String _loaderDialogRoute = 'fullscreen_loader_dialog';
+  static bool _isLoaderShowing = false;
+
   static void showToastMessage(String message, BuildContext context) {
     final snackBar = SnackBar(
       content: Text(
@@ -100,6 +104,10 @@ class Utility {
   }
 
   static showFullScreenLoader({required BuildContext context, String? title}) {
+    if (_isLoaderShowing) return;
+
+    _isLoaderShowing = true;
+
     var spinkit = SpinKitPouringHourGlassRefined(
       color: AppColors().getCurrentColorScheme(context: context).primary,
       size: 50.0,
@@ -107,29 +115,51 @@ class Utility {
 
     showDialog(
       context: context,
+      barrierDismissible: false,
+      routeSettings: RouteSettings(
+        name: _loaderDialogRoute,
+      ), // Assign unique route name
       builder:
-          (context) => Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              spinkit,
-              MyGap(gap: 8),
-              MyText.bodyLarge(
-                title ?? "Please wait!",
-                style: TextStyle(
-                  color:
-                      AppColors()
-                          .getCurrentColorScheme(context: context)
-                          .primary,
+          (context) => PopScope(
+            canPop: false,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                spinkit,
+                MyGap(gap: 8),
+                MyText.bodyLarge(
+                  title ?? "Please wait!",
+                  style: TextStyle(
+                    color:
+                        AppColors()
+                            .getCurrentColorScheme(context: context)
+                            .primary,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-    );
+    ).then((_) {
+      _isLoaderShowing = false;
+    });
   }
 
   static hideFullScreenLoader({required BuildContext context}) {
-    if (Navigator.of(context).overlay != null) {
-      Navigator.pop(context);
-    }
+    Utility.showLog("calling hideFullScreenLoader");
+
+    if (!_isLoaderShowing) return;
+
+    // Pop only if the loader dialog is on top of the stack
+    Navigator.of(context).popUntil((route) {
+      if (route.settings.name == _loaderDialogRoute) {
+        // Found the loader dialog, pop it
+        Navigator.of(context).pop();
+        return true; // Stop the popUntil
+      }
+      // If loader is not found in the stack, stop without popping anything
+      return !route.settings.name.toString().contains(_loaderDialogRoute);
+    });
+
+    _isLoaderShowing = false;
   }
 }
