@@ -49,6 +49,8 @@ class ImportCollectionBloc
         try {
           final Map<String, dynamic> jsonMap = jsonDecode(content);
           collection = PostmanCollection.fromJson(jsonMap);
+          // saving the state of postman collection.
+          emit(state.copyWith(postmanCollection: collection));
 
           Utility.showLog("collection.info : ${collection.info}\n");
         } catch (e) {
@@ -84,7 +86,7 @@ class ImportCollectionBloc
           ),
         );
 
-        add(BuildImportPreview(collection: collection));
+        add(BuildImportPreview());
       }
     } catch (e) {}
   }
@@ -93,13 +95,12 @@ class ImportCollectionBloc
     BuildImportPreview event,
     Emitter<ImportCollectionState> emit,
   ) {
-    final previewTree = buildPreviewTree(event.collection.item);
+    final previewTree = buildPreviewTree(state.postmanCollection.item);
 
     emit(
       state.copyWith(
         status: ImportCollectionScreenStatus.preview,
         previewTree: previewTree,
-        postmanInfo: event.collection.info,
       ),
     );
   }
@@ -114,8 +115,7 @@ class ImportCollectionBloc
       ImportCollectionRepo repo = ImportCollectionRepo();
 
       final res = await repo.importCollection(
-        collectionName: state.postmanInfo.name ?? 'UNKNOWN',
-        description: state.postmanInfo.description,
+        postmanCollection: state.postmanCollection,
         previewTree: state.previewTree,
       );
       Utility.showLog("handleImportDataToLocalStorage res : $res");

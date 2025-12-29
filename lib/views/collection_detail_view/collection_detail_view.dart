@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/collection_detail_bloc/collection_detail_bloc.dart';
 import '../../domain/model/collection_detail_model/collection_explorer_node.dart';
+import '../variables_view/collection_variable_view.dart';
 
 class CollectionDetailView extends StatefulWidget {
   final int collectionID;
@@ -28,6 +29,22 @@ class _CollectionDetailViewState extends State<CollectionDetailView> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Collection Details'),
+          actions: [
+    IconButton(
+      icon: const Icon(Icons.tune),
+      tooltip: 'Variables',
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CollectionVariablesView(
+              collectionID: widget.collectionID,
+            ),
+          ),
+        );
+      },
+    ),
+  ],
         ),
         body: BlocBuilder<CollectionDetailBloc, CollectionDetailState>(
           builder: (context, state) {

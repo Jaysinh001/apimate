@@ -6,7 +6,7 @@ class PostmanCollection {
   final PostmanAuth? auth;
   final Map<String, dynamic>? protocolProfileBehavior;
 
-  PostmanCollection({
+ const PostmanCollection({
     this.info,
     this.item,
     this.event,

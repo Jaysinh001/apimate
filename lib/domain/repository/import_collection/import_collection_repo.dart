@@ -294,8 +294,7 @@ class ImportCollectionRepo {
   ///
   /// Returns newly created collectionId
   Future<int> importCollection({
-    required String collectionName,
-    String? description,
+    required PostmanCollection postmanCollection,
     required List<ImportPreviewNode> previewTree,
   }) async {
     try {
@@ -305,15 +304,22 @@ class ImportCollectionRepo {
       return await db.transaction<int>((txn) async {
         // 1️⃣ Insert collection
         final int collectionId = await txn.insert('collections', {
-          'name': collectionName,
-          'description': description,
+          'name': postmanCollection.info?.name ?? "UNKNOWN COLLECTION",
+          'description': postmanCollection.info?.description,
           'sync_status': 'local',
           'is_deleted': 0,
           'created_at': now,
           'updated_at': now,
         });
 
-        // 2️⃣ Insert folders + requests + hydrate
+        // 2️⃣ Insert collection variables
+        await _insertCollectionVariables(
+          txn: txn,
+          collectionId: collectionId,
+          variables: postmanCollection.variable,
+        );
+
+        // 3️⃣ Insert folders + requests + hydrate
         await _insertPreviewNodes(
           txn: txn,
           collectionId: collectionId,
@@ -325,6 +331,35 @@ class ImportCollectionRepo {
       });
     } catch (e) {
       rethrow;
+    }
+  }
+
+  /// ===============================
+  /// COLLECTION VARIABLE INSERTION
+  /// ===============================
+  Future<void> _insertCollectionVariables({
+    required Transaction txn,
+    required int collectionId,
+    required List<dynamic>? variables,
+  }) async {
+    if (variables == null || variables.isEmpty) return;
+
+    final now = DateTime.now().toIso8601String();
+
+    for (final variable in variables) {
+      final key = variable['key'];
+      if (key == null || key.toString().trim().isEmpty) continue;
+
+      await txn.insert('collection_variables', {
+        'collection_id': collectionId,
+        'key': key,
+        'value': variable['value']?.toString(),
+        'is_active': 1,
+        'sync_status': 'local',
+        'is_deleted': 0,
+        'created_at': now,
+        'updated_at': now,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
     }
   }
 

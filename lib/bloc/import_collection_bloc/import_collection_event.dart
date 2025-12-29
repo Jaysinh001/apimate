@@ -22,10 +22,11 @@ class ImportDataToLocalStorage extends ImportCollectionEvent {
 }
 
 class BuildImportPreview extends ImportCollectionEvent {
-  final PostmanCollection collection;
+  // final PostmanCollection collection;
 
-  const BuildImportPreview({required this.collection});
+  // const BuildImportPreview({required this.collection});
+  const BuildImportPreview();
 
   @override
-  List<Object?> get props => [collection];
+  List<Object?> get props => [];
 }
