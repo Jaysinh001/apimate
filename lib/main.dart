@@ -1,6 +1,6 @@
 import 'package:apimate/bloc/api_list_bloc/api_list_bloc.dart';
 import 'package:apimate/bloc/api_request_bloc/api_request_bloc.dart';
-import 'package:apimate/bloc/collection_bloc/collection_bloc.dart';
+import 'package:apimate/bloc/collection_list_bloc/collection_list_bloc.dart';
 import 'package:apimate/config/utility/utility.dart';
 import 'package:apimate/data/services/database_service.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => ThemeBloc()),
-        BlocProvider(create: (context) => CollectionBloc()),
+        BlocProvider(create: (context) => CollectionListBloc()),
         BlocProvider(create: (context) => ApiListBloc()),
         BlocProvider(create: (context) => ApiRequestBloc()),
       ],

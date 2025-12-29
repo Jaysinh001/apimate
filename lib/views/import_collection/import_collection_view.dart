@@ -1,4 +1,4 @@
-import 'package:apimate/bloc/collection_bloc/collection_bloc.dart';
+import 'package:apimate/bloc/collection_list_bloc/collection_list_bloc.dart';
 import 'package:apimate/config/components/my_navbar.dart';
 import 'package:apimate/config/components/my_text.dart';
 import 'package:apimate/views/import_collection/import_file_container_widget.dart';
@@ -48,14 +48,13 @@ class _ImportCollectionViewState extends State<ImportCollectionView> {
         }
 
         if (state.status == ImportCollectionScreenStatus.imported) {
-          context.read<CollectionBloc>().add(GetCollectionsFromLocalDB());
+          context.read<CollectionListBloc>().add(GetCollectionsFromLocalDB());
 
           Utility.hideFullScreenLoader(context: context);
           Utility.showToastMessage(
             "The Postman collection is loaded!",
             context,
           );
-          await Future.delayed(Duration(seconds: 2));
           // poping the import screen and bottomsheet.
           Navigator.of(context).popUntil((route) => route.isFirst);
         }
