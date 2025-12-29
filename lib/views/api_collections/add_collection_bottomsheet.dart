@@ -1,4 +1,4 @@
-import 'package:apimate/bloc/collection_bloc/collection_bloc.dart';
+import 'package:apimate/bloc/collection_list_bloc/collection_list_bloc.dart';
 import 'package:apimate/config/components/my_btn.dart';
 import 'package:apimate/config/components/my_gap.dart';
 import 'package:apimate/config/components/my_text.dart';
@@ -36,7 +36,7 @@ class AddCollectionBottomsheet extends StatelessWidget {
               Utility.showLog("New Collection add button clicked!!");
 
               if (collectionName.text.isNotEmpty) {
-                context.read<CollectionBloc>().add(
+                context.read<CollectionListBloc>().add(
                   CreateCollection(name: collectionName.text),
                 );
               } else {
@@ -64,7 +64,7 @@ class AddCollectionBottomsheet extends StatelessWidget {
             onBtnTap: () {
               Utility.showLog("Import Collection add button clicked!!");
 
-              // context.read<CollectionBloc>().add(ImportCollectionFile());
+              // context.read<CollectionListBloc>().add(ImportCollectionFile());
               // Navigator.pop(context); // Closing the bottomsheet
 
               Navigator.pushNamed(context, RoutesName.importCollectionView);

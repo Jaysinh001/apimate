@@ -5,4 +5,6 @@ class RoutesName {
   static const String importCollectionView = "import_collection_view";
   static const String apiList = "api_list";
   static const String apiResponseView = "api_response_view";
+  // static const String apiResponseView = "api_response_view";
+  static const String collectionDetailView = "collection_detail_view";
 }

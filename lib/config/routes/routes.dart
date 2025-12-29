@@ -1,5 +1,6 @@
 import 'package:apimate/views/api_collections/api_collections.dart';
 import 'package:apimate/views/api_list/api_list.dart';
+import 'package:apimate/views/collection_detail_view/collection_detail_view.dart';
 import 'package:apimate/views/import_collection/import_collection_view.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -27,6 +28,17 @@ class Routes {
         return MaterialPageRoute(
           builder: (context) => const ImportCollectionView(),
         );
+      case RoutesName.collectionDetailView:
+        final _id = settings.arguments;
+
+        if (_id is int && _id > 0) {
+          return MaterialPageRoute(
+            builder: (context) => CollectionDetailView(collectionID: _id),
+          );
+        }else{
+          return MaterialPageRoute(builder: (context)=> const DefaultRouteScreenView());
+        }
+
       case RoutesName.apiList:
         return MaterialPageRoute(
           builder:

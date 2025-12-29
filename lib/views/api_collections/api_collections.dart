@@ -1,4 +1,4 @@
-import 'package:apimate/bloc/collection_bloc/collection_bloc.dart';
+import 'package:apimate/bloc/collection_list_bloc/collection_list_bloc.dart';
 import 'package:apimate/config/components/my_navbar.dart';
 import 'package:apimate/config/components/my_text.dart';
 import 'package:apimate/config/routes/routes_name.dart';
@@ -19,13 +19,13 @@ class ApiCollectionsScreen extends StatefulWidget {
 }
 
 class _ApiCollectionsScreenState extends State<ApiCollectionsScreen> {
-  late CollectionBloc collectionBloc;
+  late CollectionListBloc collectionBloc;
 
   @override
   void initState() {
     super.initState();
 
-    collectionBloc = context.read<CollectionBloc>();
+    collectionBloc = context.read<CollectionListBloc>();
     collectionBloc.add(const GetCollectionsFromLocalDB());
   }
 
@@ -97,7 +97,7 @@ class _ApiCollectionsScreenState extends State<ApiCollectionsScreen> {
             ),
 
             Expanded(
-              child: BlocConsumer<CollectionBloc, CollectionState>(
+              child: BlocConsumer<CollectionListBloc, CollectionListState>(
                 listener: (context, state) {
                   if (state.collectionScreenStatus ==
                       CollectionScreenStatus.loading) {
@@ -135,7 +135,7 @@ class _ApiCollectionsScreenState extends State<ApiCollectionsScreen> {
                             onCollectionTap: () {
                               Navigator.pushNamed(
                                 context,
-                                RoutesName.apiList,
+                                RoutesName.collectionDetailView,
                                 arguments: state.collectionList[index].id,
                               );
                             },

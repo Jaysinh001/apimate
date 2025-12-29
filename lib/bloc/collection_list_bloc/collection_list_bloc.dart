@@ -9,11 +9,11 @@ import '../../config/utility/utility.dart' show Utility;
 import '../../domain/model/collection_list_model.dart';
 import '../../domain/model/import_collection_model/raw_import_model.dart';
 
-part 'collection_event.dart';
-part 'collection_state.dart';
+part 'collection_list_event.dart';
+part 'collection_list_state.dart';
 
-class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
-  CollectionBloc() : super(const CollectionState()) {
+class CollectionListBloc extends Bloc<CollectionListEvent, CollectionListState> {
+  CollectionListBloc() : super(const CollectionListState()) {
     on<GetCollectionsFromLocalDB>(handleGetCollectionsFromLocalDB);
     on<CreateCollection>(handleCreateCollection);
     on<DeleteCollection>(handleDeleteCollection);
@@ -21,7 +21,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
 
   Future<void> handleGetCollectionsFromLocalDB(
     GetCollectionsFromLocalDB event,
-    Emitter<CollectionState> emit,
+    Emitter<CollectionListState> emit,
   ) async {
     emit(
       state.copyWith(collectionScreenStatus: CollectionScreenStatus.loading),
@@ -58,7 +58,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
 
   FutureOr<void> handleCreateCollection(
     CreateCollection event,
-    Emitter<CollectionState> emit,
+    Emitter<CollectionListState> emit,
   ) async {
     emit(
       state.copyWith(collectionScreenStatus: CollectionScreenStatus.loading),
@@ -110,7 +110,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
 
   FutureOr<void> handleDeleteCollection(
     DeleteCollection event,
-    Emitter<CollectionState> emit,
+    Emitter<CollectionListState> emit,
   ) async {
     emit(
       state.copyWith(collectionScreenStatus: CollectionScreenStatus.loading),
