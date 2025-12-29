@@ -8,6 +8,7 @@ class ImportCollectionState extends Equatable {
   final int importFolderCount;
   final int importRequestCount;
   final PostmanInfo postmanInfo;
+  final PostmanCollection postmanCollection;
   final Map<String, int> importMethodCount;
 
   final String? message;
@@ -18,6 +19,7 @@ class ImportCollectionState extends Equatable {
     this.importRequestCount = 0,
     this.importMethodCount = const {},
     this.previewTree = const [],
+    this.postmanCollection = const PostmanCollection(),
     this.postmanInfo = const PostmanInfo(description: '' , name: '' , postmanId: '', version: '', schema: '' ),
     this.message,
   });
@@ -28,6 +30,7 @@ class ImportCollectionState extends Equatable {
     int? importRequestCount,
     Map<String, int>? importMethodCount,
     List<ImportPreviewNode>? previewTree,
+    PostmanCollection? postmanCollection,
     PostmanInfo? postmanInfo,
     String? message,
   }) {
@@ -37,6 +40,7 @@ class ImportCollectionState extends Equatable {
       importRequestCount: importRequestCount ?? this.importRequestCount,
       importMethodCount: importMethodCount ?? this.importMethodCount,
       previewTree: previewTree ?? this.previewTree,
+      postmanCollection: postmanCollection ?? this.postmanCollection,
       postmanInfo: postmanInfo ?? this.postmanInfo,
       message: message,
     );
@@ -49,6 +53,7 @@ class ImportCollectionState extends Equatable {
     importFolderCount,
     importMethodCount,
     previewTree,
+    postmanCollection,
     postmanInfo,
     message,
   ];

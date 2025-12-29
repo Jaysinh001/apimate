@@ -159,11 +159,35 @@ class DatabaseService {
 );
 ''';
 
+    String collectionVariables = '''
+CREATE TABLE collection_variables (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  collection_id INTEGER NOT NULL,
+
+  key TEXT NOT NULL,
+  value TEXT,
+
+  is_active INTEGER DEFAULT 1,
+
+  sync_status TEXT DEFAULT 'local',
+  is_deleted INTEGER DEFAULT 0,
+  last_synced_at TEXT,
+
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+
+  FOREIGN KEY (collection_id)
+    REFERENCES collections(id)
+    ON DELETE CASCADE,
+
+  UNIQUE (collection_id, key)
+);
+''';
+
     final database = await openDatabase(
       databasePath,
       version: 1,
       onCreate: (db, version) async {
-
         await db.execute(collection);
         await db.execute(folder);
         await db.execute(request);
@@ -173,10 +197,9 @@ class DatabaseService {
         await db.execute(responses);
         await db.execute(loadTestRuns);
         await db.execute(loadTestResults);
-
+        await db.execute(collectionVariables);
       },
     );
-
 
     return database;
   }
