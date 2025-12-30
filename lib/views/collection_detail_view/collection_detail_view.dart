@@ -1,3 +1,4 @@
+import 'package:apimate/config/routes/routes_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -30,21 +31,22 @@ class _CollectionDetailViewState extends State<CollectionDetailView> {
         appBar: AppBar(
           title: const Text('Collection Details'),
           actions: [
-    IconButton(
-      icon: const Icon(Icons.tune),
-      tooltip: 'Variables',
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => CollectionVariablesView(
-              collectionID: widget.collectionID,
+            IconButton(
+              icon: const Icon(Icons.tune),
+              tooltip: 'Variables',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (_) => CollectionVariablesView(
+                          collectionID: widget.collectionID,
+                        ),
+                  ),
+                );
+              },
             ),
-          ),
-        );
-      },
-    ),
-  ],
+          ],
         ),
         body: BlocBuilder<CollectionDetailBloc, CollectionDetailState>(
           builder: (context, state) {
@@ -57,9 +59,10 @@ class _CollectionDetailViewState extends State<CollectionDetailView> {
                   return const Center(child: Text('No data found'));
                 }
                 return ListView(
-                  children: state.explorerTree
-                      .map((node) => _ExplorerNodeWidget(node: node))
-                      .toList(),
+                  children:
+                      state.explorerTree
+                          .map((node) => _ExplorerNodeWidget(node: node))
+                          .toList(),
                 );
 
               case CollectionDetailStatus.error:
@@ -77,8 +80,6 @@ class _CollectionDetailViewState extends State<CollectionDetailView> {
   }
 }
 
-
-
 class _ExplorerNodeWidget extends StatelessWidget {
   final CollectionExplorerNode node;
 
@@ -91,9 +92,10 @@ class _ExplorerNodeWidget extends StatelessWidget {
       return ExpansionTile(
         leading: const Icon(Icons.folder),
         title: Text(node.name),
-        children: node.children
-            .map((child) => _ExplorerNodeWidget(node: child))
-            .toList(),
+        children:
+            node.children
+                .map((child) => _ExplorerNodeWidget(node: child))
+                .toList(),
       );
     }
 
@@ -107,14 +109,16 @@ class _ExplorerNodeWidget extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
       ),
       onTap: () {
-        // Future: Navigate to Request Detail Screen
-        // Navigator.push(...)
+        // Navigate to Request Detail Screen
+        Navigator.pushNamed(
+          context,
+          RoutesName.requestClientView,
+          arguments: node.id,
+        );
       },
     );
   }
 }
-
-
 
 class _MethodBadge extends StatelessWidget {
   final String method;
@@ -157,4 +161,3 @@ class _MethodBadge extends StatelessWidget {
     }
   }
 }
-
