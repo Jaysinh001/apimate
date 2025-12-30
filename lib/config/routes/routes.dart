@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 
 import '../../domain/model/get_api_list_model.dart';
 import '../../views/api_request/api_response_view.dart';
+import '../../views/request_client/request_client_view.dart';
 import '../../views/views.dart';
 import 'routes_name.dart';
 
@@ -34,6 +35,16 @@ class Routes {
         if (_id is int && _id > 0) {
           return MaterialPageRoute(
             builder: (context) => CollectionDetailView(collectionID: _id),
+          );
+        }else{
+          return MaterialPageRoute(builder: (context)=> const DefaultRouteScreenView());
+        }
+      case RoutesName.requestClientView:
+        final _id = settings.arguments;
+
+        if (_id is int && _id > 0) {
+          return MaterialPageRoute(
+            builder: (context) => RequestClientView(requestId: _id),
           );
         }else{
           return MaterialPageRoute(builder: (context)=> const DefaultRouteScreenView());
