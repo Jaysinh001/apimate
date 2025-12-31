@@ -16,8 +16,7 @@ import '../../domain/repository/variable_repo/variable_resolver_engine.dart';
 part 'request_client_event.dart';
 part 'request_client_state.dart';
 
-class RequestClientBloc
-    extends Bloc<RequestClientEvent, RequestClientState> {
+class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
   final RequestClientRepo _repo;
   final RequestExecutionService _executor;
 
@@ -27,9 +26,9 @@ class RequestClientBloc
   RequestClientBloc({
     RequestClientRepo? repo,
     RequestExecutionService? executor,
-  })  : _repo = repo ?? RequestClientRepo(),
-        _executor = executor ?? RequestExecutionService(),
-        super(const RequestClientState()) {
+  }) : _repo = repo ?? RequestClientRepo(),
+       _executor = executor ?? RequestExecutionService(),
+       super(const RequestClientState()) {
     on<LoadRequestDetails>(_handleLoadRequestDetails);
     on<RefreshResolvedRequest>(_handleRefreshResolvedRequest);
     on<SendRequest>(_handleSendRequest);
@@ -44,6 +43,8 @@ class RequestClientBloc
 
     on<UpdateRequestBody>(_handleUpdateRequestBody);
     on<UpdateResolvedUrl>(_handleUpdateResolvedUrl);
+
+    on<SaveResponse>(_handleSaveResponse);
   }
 
   // ============================================================
@@ -148,9 +149,10 @@ class RequestClientBloc
 
       emit(
         state.copyWith(
-          status: response.isError
-              ? RequestClientStatus.error
-              : RequestClientStatus.success,
+          status:
+              response.isError
+                  ? RequestClientStatus.error
+                  : RequestClientStatus.success,
           lastResponse: response,
           message: response.isError ? response.errorMessage : null,
         ),
@@ -186,25 +188,18 @@ class RequestClientBloc
   // RESOLVED URL EDIT EVENTS
   // ============================================================
   void _handleUpdateResolvedUrl(
-  UpdateResolvedUrl event,
-  Emitter<RequestClientState> emit,
-) {
-  if (state.draft == null) return;
+    UpdateResolvedUrl event,
+    Emitter<RequestClientState> emit,
+  ) {
+    if (state.draft == null) return;
 
-  _updateDraft(
-    emit,
-    state.draft!.copyWith(rawUrl: event.url),
-  );
-}
-
+    _updateDraft(emit, state.draft!.copyWith(rawUrl: event.url));
+  }
 
   // ============================================================
   // HEADER EDIT EVENTS
   // ============================================================
-  void _handleAddHeader(
-    AddHeader event,
-    Emitter<RequestClientState> emit,
-  ) {
+  void _handleAddHeader(AddHeader event, Emitter<RequestClientState> emit) {
     if (state.draft == null) return;
 
     final headers = Map<String, String>.from(state.draft!.headers)
@@ -310,5 +305,17 @@ class RequestClientBloc
         variableWarnings: resolution.warnings,
       ),
     );
+  }
+
+  void _handleSaveResponse(
+    SaveResponse event,
+    Emitter<RequestClientState> emit,
+  ) {
+    if (state.lastResponse == null) return;
+
+    // TODO: Persist response via repository
+    // repo.saveResponse(state.lastResponse!)
+
+    // UX feedback handled in UI
   }
 }
