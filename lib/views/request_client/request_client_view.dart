@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/request_client_bloc/request_client_bloc.dart';
+import '../../config/utility/pretty_json_helper.dart';
 import 'request_actionbar_widget.dart';
 import 'request_client_tabs.dart';
 
@@ -232,6 +233,12 @@ class ResponseTab extends StatelessWidget {
           );
         }
 
+        final isJson = JsonPrettyHelper.isJson(response.body);
+        final bodyText =
+            isJson
+                ? JsonPrettyHelper.prettyPrint(response.body)
+                : response.body;
+
         final statusColor = response.isSuccess ? Colors.green : Colors.red;
 
         return Column(
@@ -243,7 +250,9 @@ class ResponseTab extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 // color: Theme.of(context).cardColor,
-                border: Border(bottom: BorderSide(color: Theme.of(context).primaryColor)),
+                border: Border(
+                  bottom: BorderSide(color: Theme.of(context).primaryColor),
+                ),
               ),
               child: Row(
                 children: [
@@ -275,18 +284,41 @@ class ResponseTab extends StatelessWidget {
 
                   const Spacer(),
 
-                  Text("Copy Body" , style: const TextStyle(color: Colors.grey),),
+                  Text("Save", style: const TextStyle(color: Colors.grey)),
+                  // Save response
+                  IconButton(
+                    tooltip: 'Save response',
+                    icon: Icon(
+                      Icons.save,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    onPressed: () {
+                      context.read<RequestClientBloc>().add(
+                        const SaveResponse(),
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Response saved'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                  ),
+
+                  Text("Copy", style: const TextStyle(color: Colors.grey)),
                   // Copy button
                   IconButton(
                     tooltip: 'Copy response',
-                    icon: Icon(Icons.copy , color: Theme.of(context).primaryColor,),
+                    icon: Icon(
+                      Icons.copy,
+                      color: Theme.of(context).primaryColor,
+                    ),
                     onPressed:
                         response.body.isEmpty
                             ? null
                             : () {
-                              Clipboard.setData(
-                                ClipboardData(text: response.body),
-                              );
+                              Clipboard.setData(ClipboardData(text: bodyText));
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -315,7 +347,7 @@ class ResponseTab extends StatelessWidget {
                       : SingleChildScrollView(
                         padding: const EdgeInsets.all(12),
                         child: SelectableText(
-                          response.body,
+                          bodyText,
                           style: const TextStyle(fontSize: 13, height: 1.4),
                         ),
                       ),
@@ -407,11 +439,5 @@ class _AddRow extends StatelessWidget {
     );
   }
 }
-
-
-// {
-//   "identifier": "testdriver@gmail.com",
-//   "password":"test@123"
-// }
 
 

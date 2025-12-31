@@ -107,3 +107,8 @@ class UpdateResolvedUrl extends RequestClientEvent {
   @override
   List<Object?> get props => [url];
 }
+
+
+class SaveResponse extends RequestClientEvent {
+  const SaveResponse();
+}
