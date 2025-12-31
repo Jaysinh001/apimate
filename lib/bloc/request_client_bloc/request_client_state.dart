@@ -9,20 +9,20 @@ enum RequestClientStatus {
   error,
 }
 
-
-
-
 class RequestClientState extends Equatable {
   final RequestClientStatus status;
 
+  /// Immutable request identity
   final int? requestId;
-  final String? method;
 
-  final String? rawUrl;
+  /// 🔑 Editable in-memory request
+  final RequestDraft? draft;
+
+  /// Variable resolution preview
   final String? resolvedUrl;
-
   final List<String> variableWarnings;
 
+  /// Last execution result
   final RequestResponse? lastResponse;
 
   final String? message;
@@ -30,8 +30,7 @@ class RequestClientState extends Equatable {
   const RequestClientState({
     this.status = RequestClientStatus.initial,
     this.requestId,
-    this.method,
-    this.rawUrl,
+    this.draft,
     this.resolvedUrl,
     this.variableWarnings = const [],
     this.lastResponse,
@@ -41,8 +40,7 @@ class RequestClientState extends Equatable {
   RequestClientState copyWith({
     RequestClientStatus? status,
     int? requestId,
-    String? method,
-    String? rawUrl,
+    RequestDraft? draft,
     String? resolvedUrl,
     List<String>? variableWarnings,
     RequestResponse? lastResponse,
@@ -51,8 +49,7 @@ class RequestClientState extends Equatable {
     return RequestClientState(
       status: status ?? this.status,
       requestId: requestId ?? this.requestId,
-      method: method ?? this.method,
-      rawUrl: rawUrl ?? this.rawUrl,
+      draft: draft ?? this.draft,
       resolvedUrl: resolvedUrl ?? this.resolvedUrl,
       variableWarnings: variableWarnings ?? this.variableWarnings,
       lastResponse: lastResponse ?? this.lastResponse,
@@ -64,8 +61,7 @@ class RequestClientState extends Equatable {
   List<Object?> get props => [
         status,
         requestId,
-        method,
-        rawUrl,
+        draft,
         resolvedUrl,
         variableWarnings,
         lastResponse,
