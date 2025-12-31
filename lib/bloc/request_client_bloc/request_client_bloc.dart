@@ -4,9 +4,11 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/model/request_client_model/request_client_data_model.dart';
+import '../../domain/model/request_client_model/request_draft_model.dart';
 import '../../domain/model/request_client_model/request_execution_input.dart';
 import '../../domain/model/request_client_model/request_response_model.dart';
 import '../../domain/model/variable_resolution_engine_model/variable_resolution_engine_model.dart';
+
 import '../../domain/repository/request_client/request_client_repo.dart';
 import '../../domain/repository/request_client/request_execution_service.dart';
 import '../../domain/repository/variable_repo/variable_resolver_engine.dart';
@@ -14,26 +16,39 @@ import '../../domain/repository/variable_repo/variable_resolver_engine.dart';
 part 'request_client_event.dart';
 part 'request_client_state.dart';
 
-class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
+class RequestClientBloc
+    extends Bloc<RequestClientEvent, RequestClientState> {
   final RequestClientRepo _repo;
   final RequestExecutionService _executor;
 
+  /// Immutable DB-loaded metadata
   RequestClientData? _requestData;
 
   RequestClientBloc({
     RequestClientRepo? repo,
     RequestExecutionService? executor,
-  }) : _repo = repo ?? RequestClientRepo(),
-       _executor = executor ?? RequestExecutionService(),
-       super(const RequestClientState()) {
+  })  : _repo = repo ?? RequestClientRepo(),
+        _executor = executor ?? RequestExecutionService(),
+        super(const RequestClientState()) {
     on<LoadRequestDetails>(_handleLoadRequestDetails);
     on<RefreshResolvedRequest>(_handleRefreshResolvedRequest);
     on<SendRequest>(_handleSendRequest);
+
+    on<AddHeader>(_handleAddHeader);
+    on<UpdateHeader>(_handleUpdateHeader);
+    on<RemoveHeader>(_handleRemoveHeader);
+
+    on<AddQueryParam>(_handleAddQueryParam);
+    on<UpdateQueryParam>(_handleUpdateQueryParam);
+    on<RemoveQueryParam>(_handleRemoveQueryParam);
+
+    on<UpdateRequestBody>(_handleUpdateRequestBody);
+    on<UpdateResolvedUrl>(_handleUpdateResolvedUrl);
   }
 
-  // ===============================
-  // LOAD REQUEST
-  // ===============================
+  // ============================================================
+  // LOAD REQUEST (DB → Draft)
+  // ============================================================
   Future<void> _handleLoadRequestDetails(
     LoadRequestDetails event,
     Emitter<RequestClientState> emit,
@@ -43,14 +58,22 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
 
       _requestData = await _repo.loadRequest(event.requestId);
 
-      final resolution = _resolveUrl(_requestData!);
+      final draft = RequestDraft.fromLoadedData(
+        method: _requestData!.method,
+        rawUrl: _requestData!.rawUrl,
+        headers: _requestData!.headers,
+        queryParams: _requestData!.queryParams,
+        body: _requestData!.body?.content,
+        contentType: _requestData!.body?.contentType,
+      );
+
+      final resolution = _resolveUrl(draft);
 
       emit(
         state.copyWith(
           status: RequestClientStatus.ready,
           requestId: _requestData!.requestId,
-          method: _requestData!.method,
-          rawUrl: _requestData!.rawUrl,
+          draft: draft,
           resolvedUrl: resolution.resolvedValue,
           variableWarnings: resolution.warnings,
         ),
@@ -65,16 +88,16 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
     }
   }
 
-  // ===============================
-  // REFRESH VARIABLE RESOLUTION
-  // ===============================
-  Future<void> _handleRefreshResolvedRequest(
+  // ============================================================
+  // REFRESH VARIABLE RESOLUTION (no mutation)
+  // ============================================================
+  void _handleRefreshResolvedRequest(
     RefreshResolvedRequest event,
     Emitter<RequestClientState> emit,
-  ) async {
-    if (_requestData == null) return;
+  ) {
+    if (state.draft == null) return;
 
-    final resolution = _resolveUrl(_requestData!);
+    final resolution = _resolveUrl(state.draft!);
 
     emit(
       state.copyWith(
@@ -84,20 +107,19 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
     );
   }
 
-  // ===============================
-  // SEND REQUEST
-  // ===============================
+  // ============================================================
+  // SEND REQUEST (Draft → Execute)
+  // ============================================================
   Future<void> _handleSendRequest(
     SendRequest event,
     Emitter<RequestClientState> emit,
   ) async {
-    if (_requestData == null) return;
+    if (state.draft == null || _requestData == null) return;
 
     emit(state.copyWith(status: RequestClientStatus.sending));
 
     try {
-      // Resolve URL again (latest variables)
-      final resolution = _resolveUrl(_requestData!);
+      final resolution = _resolveUrl(state.draft!);
 
       if (resolution.hasErrors) {
         emit(
@@ -111,12 +133,12 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
       }
 
       final input = RequestExecutionInput(
-        method: _requestData!.method,
+        method: state.draft!.method,
         url: resolution.resolvedValue,
-        headers: _requestData!.headers,
-        queryParams: _requestData!.queryParams,
-        body: _requestData!.body?.content,
-        contentType: _requestData!.body?.contentType,
+        headers: state.draft!.headers,
+        queryParams: state.draft!.queryParams,
+        body: state.draft!.body,
+        contentType: state.draft!.contentType,
       );
 
       final response = await _executor.execute(
@@ -126,10 +148,9 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
 
       emit(
         state.copyWith(
-          status:
-              response.isError
-                  ? RequestClientStatus.error
-                  : RequestClientStatus.success,
+          status: response.isError
+              ? RequestClientStatus.error
+              : RequestClientStatus.success,
           lastResponse: response,
           message: response.isError ? response.errorMessage : null,
         ),
@@ -144,20 +165,150 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
     }
   }
 
-  // ===============================
-  // VARIABLE RESOLUTION (URL only for now)
-  // ===============================
-  VariableResolutionResult _resolveUrl(RequestClientData data) {
+  // ============================================================
+  // VARIABLE RESOLUTION (always via Draft)
+  // ============================================================
+  VariableResolutionResult _resolveUrl(RequestDraft draft) {
     return VariableResolver.resolve(
-      data.rawUrl,
+      draft.rawUrl,
       sources: [
-        // Folder variables (future)
         VariableSource(
-          values: data.collectionVariables,
-          inactiveKeys: data.inactiveCollectionVariables,
+          values: _requestData!.collectionVariables,
+          inactiveKeys: _requestData!.inactiveCollectionVariables,
         ),
+        // Folder variables (future)
         // Environment variables (future)
       ],
+    );
+  }
+
+  // ============================================================
+  // RESOLVED URL EDIT EVENTS
+  // ============================================================
+  void _handleUpdateResolvedUrl(
+  UpdateResolvedUrl event,
+  Emitter<RequestClientState> emit,
+) {
+  if (state.draft == null) return;
+
+  _updateDraft(
+    emit,
+    state.draft!.copyWith(rawUrl: event.url),
+  );
+}
+
+
+  // ============================================================
+  // HEADER EDIT EVENTS
+  // ============================================================
+  void _handleAddHeader(
+    AddHeader event,
+    Emitter<RequestClientState> emit,
+  ) {
+    if (state.draft == null) return;
+
+    final headers = Map<String, String>.from(state.draft!.headers)
+      ..[event.key] = event.value;
+
+    _updateDraft(emit, state.draft!.copyWith(headers: headers));
+  }
+
+  void _handleUpdateHeader(
+    UpdateHeader event,
+    Emitter<RequestClientState> emit,
+  ) {
+    if (state.draft == null) return;
+
+    final headers = Map<String, String>.from(state.draft!.headers)
+      ..[event.key] = event.value;
+
+    _updateDraft(emit, state.draft!.copyWith(headers: headers));
+  }
+
+  void _handleRemoveHeader(
+    RemoveHeader event,
+    Emitter<RequestClientState> emit,
+  ) {
+    if (state.draft == null) return;
+
+    final headers = Map<String, String>.from(state.draft!.headers)
+      ..remove(event.key);
+
+    _updateDraft(emit, state.draft!.copyWith(headers: headers));
+  }
+
+  // ============================================================
+  // QUERY PARAM EDIT EVENTS
+  // ============================================================
+  void _handleAddQueryParam(
+    AddQueryParam event,
+    Emitter<RequestClientState> emit,
+  ) {
+    if (state.draft == null) return;
+
+    final params = Map<String, String>.from(state.draft!.queryParams)
+      ..[event.key] = event.value;
+
+    _updateDraft(emit, state.draft!.copyWith(queryParams: params));
+  }
+
+  void _handleUpdateQueryParam(
+    UpdateQueryParam event,
+    Emitter<RequestClientState> emit,
+  ) {
+    if (state.draft == null) return;
+
+    final params = Map<String, String>.from(state.draft!.queryParams)
+      ..[event.key] = event.value;
+
+    _updateDraft(emit, state.draft!.copyWith(queryParams: params));
+  }
+
+  void _handleRemoveQueryParam(
+    RemoveQueryParam event,
+    Emitter<RequestClientState> emit,
+  ) {
+    if (state.draft == null) return;
+
+    final params = Map<String, String>.from(state.draft!.queryParams)
+      ..remove(event.key);
+
+    _updateDraft(emit, state.draft!.copyWith(queryParams: params));
+  }
+
+  // ============================================================
+  // BODY EDIT EVENT
+  // ============================================================
+  void _handleUpdateRequestBody(
+    UpdateRequestBody event,
+    Emitter<RequestClientState> emit,
+  ) {
+    if (state.draft == null) return;
+
+    _updateDraft(
+      emit,
+      state.draft!.copyWith(
+        body: event.body,
+        contentType: event.contentType ?? state.draft!.contentType,
+      ),
+    );
+  }
+
+  // ============================================================
+  // CENTRAL DRAFT UPDATE + RE-RESOLVE
+  // ============================================================
+  void _updateDraft(
+    Emitter<RequestClientState> emit,
+    RequestDraft updatedDraft,
+  ) {
+    final resolution = _resolveUrl(updatedDraft);
+
+    emit(
+      state.copyWith(
+        draft: updatedDraft,
+        resolvedUrl: resolution.resolvedValue,
+        variableWarnings: resolution.warnings,
+      ),
     );
   }
 }
