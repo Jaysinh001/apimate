@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/request_client_bloc/request_client_bloc.dart';
 import '../../config/utility/pretty_json_helper.dart';
 import 'request_actionbar_widget.dart';
-import 'request_client_tabs.dart';
 
 class RequestClientView extends StatefulWidget {
   final int requestId;
@@ -36,7 +35,41 @@ class _RequestClientViewState extends State<RequestClientView>
     return BlocProvider(
       create: (_) => bloc,
       child: Scaffold(
-        appBar: AppBar(title: const Text('Request')),
+        appBar: AppBar(
+          title: BlocBuilder<RequestClientBloc, RequestClientState>(
+            buildWhen: (p, c) => p.hasUnsavedChanges != c.hasUnsavedChanges,
+            builder: (context, state) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Request'),
+                  if (state.hasUnsavedChanges)
+                    const Padding(
+                      padding: EdgeInsets.only(left: 6),
+                      child: Icon(Icons.circle, size: 8, color: Colors.orange),
+                    ),
+                ],
+              );
+            },
+          ),
+          actions: [
+            Text("Save", style: const TextStyle(color: Colors.grey)),
+
+            BlocBuilder<RequestClientBloc, RequestClientState>(
+              builder: (context, state) {
+                return IconButton(
+                  icon: const Icon(Icons.save),
+                  onPressed:
+                      state.hasUnsavedChanges
+                          ? () => context.read<RequestClientBloc>().add(
+                            const SaveRequestDraft(),
+                          )
+                          : null,
+                );
+              },
+            ),
+          ],
+        ),
         body: BlocBuilder<RequestClientBloc, RequestClientState>(
           builder: (context, state) {
             if (state.status == RequestClientStatus.loading) {
@@ -47,21 +80,52 @@ class _RequestClientViewState extends State<RequestClientView>
               return const Center(child: Text('Failed to load request'));
             }
 
-            return Column(
-              children: [
-                RequestActionBar(controller: _tabController),
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: const [
-                      ParamsTab(),
-                      HeadersTab(),
-                      BodyTab(),
-                      ResponseTab(),
-                    ],
+            return PopScope(
+              canPop: !state.hasUnsavedChanges,
+              onPopInvokedWithResult: (didPop, result) async {
+                if (didPop) return;
+
+                final shouldDiscard = await showDialog<bool>(
+                  context: context,
+                  builder:
+                      (context) => AlertDialog(
+                        title: const Text('Unsaved changes'),
+                        content: const Text(
+                          'You have unsaved changes. Discard them and go back?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('Discard'),
+                          ),
+                        ],
+                      ),
+                );
+
+                if (shouldDiscard == true) {
+                  Navigator.of(context).pop(result);
+                }
+              },
+              child: Column(
+                children: [
+                  RequestActionBar(controller: _tabController),
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: const [
+                        ParamsTab(),
+                        HeadersTab(),
+                        BodyTab(),
+                        ResponseTab(),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           },
         ),
@@ -177,37 +241,60 @@ class HeadersTab extends StatelessWidget {
   }
 }
 
-class BodyTab extends StatelessWidget {
+class BodyTab extends StatefulWidget {
   const BodyTab({super.key});
+
+  @override
+  State<BodyTab> createState() => _BodyTabState();
+}
+
+class _BodyTabState extends State<BodyTab> {
+  late final TextEditingController _controller;
+  String _lastSyncedValue = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<RequestClientBloc, RequestClientState>(
+      buildWhen: (prev, curr) => prev.draft?.body != curr.draft?.body,
       builder: (context, state) {
-        final controller = TextEditingController(text: state.draft!.body ?? '');
+        final body = state.draft?.body ?? '';
+
+        // 🔑 Sync only if change came from Bloc, not typing
+        if (body != _lastSyncedValue && _controller.text != body) {
+          _controller.text = body;
+          _controller.selection = TextSelection.collapsed(offset: body.length);
+          _lastSyncedValue = body;
+        }
 
         return Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  maxLines: null,
-                  expands: true,
-                  textAlignVertical: TextAlignVertical.top,
-                  decoration: const InputDecoration(
-                    hintText: 'Request body',
-                    border: OutlineInputBorder(),
-                  ),
-                  onChanged:
-                      (v) => context.read<RequestClientBloc>().add(
-                        UpdateRequestBody(body: v),
-                      ),
-                ),
-              ),
-              SizedBox(height: 10), // gives a little clean bottom margins.
-            ],
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+          child: TextField(
+            controller: _controller,
+            maxLines: null,
+            expands: true,
+            textAlignVertical: TextAlignVertical.top,
+            decoration: const InputDecoration(
+              hintText: 'Request body',
+              border: OutlineInputBorder(),
+            ),
+            onChanged: (value) {
+              _lastSyncedValue = value;
+              context.read<RequestClientBloc>().add(
+                UpdateRequestBody(body: value),
+              );
+            },
           ),
         );
       },
@@ -439,5 +526,3 @@ class _AddRow extends StatelessWidget {
     );
   }
 }
-
-

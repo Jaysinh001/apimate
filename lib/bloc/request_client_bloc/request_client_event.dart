@@ -112,3 +112,8 @@ class UpdateResolvedUrl extends RequestClientEvent {
 class SaveResponse extends RequestClientEvent {
   const SaveResponse();
 }
+
+class SaveRequestDraft extends RequestClientEvent {
+  const SaveRequestDraft();
+}
+
