@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -45,6 +46,8 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
     on<UpdateResolvedUrl>(_handleUpdateResolvedUrl);
 
     on<SaveResponse>(_handleSaveResponse);
+
+    on<SaveRequestDraft>(_handleSaveRequestDraft);
   }
 
   // ============================================================
@@ -75,6 +78,8 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
           status: RequestClientStatus.ready,
           requestId: _requestData!.requestId,
           draft: draft,
+          savedDraft: draft, // ✅ baseline snapshot
+          hasUnsavedChanges: false,
           resolvedUrl: resolution.resolvedValue,
           variableWarnings: resolution.warnings,
         ),
@@ -298,11 +303,15 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
   ) {
     final resolution = _resolveUrl(updatedDraft);
 
+    final hasChanges =
+        state.savedDraft != null && updatedDraft != state.savedDraft;
+
     emit(
       state.copyWith(
         draft: updatedDraft,
         resolvedUrl: resolution.resolvedValue,
         variableWarnings: resolution.warnings,
+        hasUnsavedChanges: hasChanges,
       ),
     );
   }
@@ -317,5 +326,39 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
     // repo.saveResponse(state.lastResponse!)
 
     // UX feedback handled in UI
+  }
+
+  Future<void> _handleSaveRequestDraft(
+    SaveRequestDraft event,
+    Emitter<RequestClientState> emit,
+  ) async {
+    if (state.draft == null || _requestData == null) return;
+
+    try {
+      emit(state.copyWith(status: RequestClientStatus.loading));
+
+      await _repo.saveRequestDraft(
+        requestId: _requestData!.requestId,
+        draft: state.draft!,
+      );
+
+    emit(
+  state.copyWith(
+    status: RequestClientStatus.ready,
+    savedDraft: state.draft, // ✅ reset baseline
+    hasUnsavedChanges: false,
+    message: 'Changes saved',
+  ),
+);
+    } catch (e) {
+      log("_handleSaveRequestDraft : $e ");
+
+      emit(
+        state.copyWith(
+          status: RequestClientStatus.error,
+          message: 'Failed to save changes',
+        ),
+      );
+    }
   }
 }

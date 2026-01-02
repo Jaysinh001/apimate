@@ -1,13 +1,6 @@
-
 part of 'request_client_bloc.dart';
-enum RequestClientStatus {
-  initial,
-  loading,
-  ready,
-  sending,
-  success,
-  error,
-}
+
+enum RequestClientStatus { initial, loading, ready, sending, success, error }
 
 class RequestClientState extends Equatable {
   final RequestClientStatus status;
@@ -17,6 +10,12 @@ class RequestClientState extends Equatable {
 
   /// 🔑 Editable in-memory request
   final RequestDraft? draft;
+
+  /// Snapshot of last saved draft
+  final RequestDraft? savedDraft;
+
+  /// Derived flag
+  final bool hasUnsavedChanges;
 
   /// Variable resolution preview
   final String? resolvedUrl;
@@ -32,6 +31,8 @@ class RequestClientState extends Equatable {
     this.requestId,
     this.draft,
     this.resolvedUrl,
+    this.savedDraft,
+    this.hasUnsavedChanges = false,
     this.variableWarnings = const [],
     this.lastResponse,
     this.message,
@@ -41,6 +42,8 @@ class RequestClientState extends Equatable {
     RequestClientStatus? status,
     int? requestId,
     RequestDraft? draft,
+    RequestDraft? savedDraft,
+    bool? hasUnsavedChanges,
     String? resolvedUrl,
     List<String>? variableWarnings,
     RequestResponse? lastResponse,
@@ -50,6 +53,8 @@ class RequestClientState extends Equatable {
       status: status ?? this.status,
       requestId: requestId ?? this.requestId,
       draft: draft ?? this.draft,
+      savedDraft: savedDraft ?? this.savedDraft,
+      hasUnsavedChanges: hasUnsavedChanges ?? this.hasUnsavedChanges,
       resolvedUrl: resolvedUrl ?? this.resolvedUrl,
       variableWarnings: variableWarnings ?? this.variableWarnings,
       lastResponse: lastResponse ?? this.lastResponse,
@@ -59,12 +64,14 @@ class RequestClientState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        requestId,
-        draft,
-        resolvedUrl,
-        variableWarnings,
-        lastResponse,
-        message,
-      ];
+    status,
+    requestId,
+    draft,
+    savedDraft,
+    hasUnsavedChanges,
+    resolvedUrl,
+    variableWarnings,
+    lastResponse,
+    message,
+  ];
 }
