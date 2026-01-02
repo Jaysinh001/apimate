@@ -342,14 +342,14 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
         draft: state.draft!,
       );
 
-    emit(
-  state.copyWith(
-    status: RequestClientStatus.ready,
-    savedDraft: state.draft, // ✅ reset baseline
-    hasUnsavedChanges: false,
-    message: 'Changes saved',
-  ),
-);
+      emit(
+        state.copyWith(
+          status: RequestClientStatus.ready,
+          savedDraft: state.draft, // ✅ reset baseline
+          hasUnsavedChanges: false,
+          message: 'Changes saved',
+        ),
+      );
     } catch (e) {
       log("_handleSaveRequestDraft : $e ");
 
