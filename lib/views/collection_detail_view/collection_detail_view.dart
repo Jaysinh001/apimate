@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/collection_detail_bloc/collection_detail_bloc.dart';
+import '../../config/utility/file_export_helper.dart';
 import '../../domain/model/collection_detail_model/collection_explorer_node.dart';
 import '../../domain/repository/export/postman_export_repo.dart';
 import '../variables_view/collection_variable_view.dart';
@@ -53,11 +54,29 @@ class _CollectionDetailViewState extends State<CollectionDetailView> {
             IconButton(
               icon: const Icon(Icons.download),
               onPressed: () async {
-                final repo = PostmanExportRepo();
-                final json = await repo.exportCollection(widget.collectionID);
+                try {
+                  final exportRepo = PostmanExportRepo();
 
-                // TODO: save to file or share
-                log(json);
+                  // 1️⃣ Generate Postman JSON
+                  final json = await exportRepo.exportCollection(
+                    widget.collectionID,
+                  );
+
+                  // 2️⃣ Save + Share
+                  await FileExportHelper.saveAndShareFile(
+                    fileName:
+                        'collection_${widget.collectionID}.postman_collection.json',
+                    content: json,
+                  );
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Export successful')),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+                }
               },
             ),
           ],
