@@ -5,27 +5,27 @@ import 'package:dio/dio.dart';
 import '../../model/request_client_model/request_execution_input.dart';
 import '../../model/request_client_model/request_response_model.dart';
 
-
-
 class RequestExecutionService {
   final Dio _dio;
 
   RequestExecutionService({Dio? dio})
-      : _dio = dio ??
-            Dio(
-              BaseOptions(
-                connectTimeout: const Duration(seconds: 30),
-                receiveTimeout: const Duration(seconds: 30),
-                sendTimeout: const Duration(seconds: 30),
-                responseType: ResponseType.plain,
-                validateStatus: (_) => true, // handle manually
-              ),
-            );
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              connectTimeout: const Duration(seconds: 30),
+              receiveTimeout: const Duration(seconds: 30),
+              sendTimeout: const Duration(seconds: 30),
+              responseType: ResponseType.plain,
+              validateStatus: (_) => true, // handle manually
+            ),
+          );
 
   /// Execute HTTP request
   Future<RequestResponse> execute({
     required int requestId,
     required RequestExecutionInput input,
+    Duration? timeout,
   }) async {
     final stopwatch = Stopwatch()..start();
 
@@ -41,6 +41,8 @@ class RequestExecutionService {
             if (input.contentType != null)
               HttpHeaders.contentTypeHeader: input.contentType,
           },
+          sendTimeout: timeout, // overrides if timout is passed
+          receiveTimeout: timeout, // overrides if timout is passed
         ),
       );
 
@@ -87,6 +89,18 @@ class RequestExecutionService {
         createdAt: DateTime.now(),
       );
     }
+  }
+
+  /// This function is used for load-test.
+  Future<RequestResponse> executeRaw({
+    required RequestExecutionInput input,
+    Duration timeout = const Duration(seconds: 8),
+  }) async {
+    return await execute(
+      requestId: -1,
+      input: input,
+      timeout: timeout, // ✅ enforce
+    );
   }
 
   /// Normalize headers to String -> String

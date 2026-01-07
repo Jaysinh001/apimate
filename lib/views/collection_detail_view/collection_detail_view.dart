@@ -79,6 +79,21 @@ class _CollectionDetailViewState extends State<CollectionDetailView> {
                 }
               },
             ),
+            BlocBuilder<CollectionDetailBloc, CollectionDetailState>(
+              builder: (context, state) {
+                return IconButton(
+                  icon: const Icon(Icons.speed_rounded),
+                  onPressed: () async {
+                    // Navigate to Request Detail Screen
+                    Navigator.pushNamed(
+                      context,
+                      RoutesName.selectApisView,
+                      arguments: state.explorerTree,
+                    );
+                  },
+                );
+              },
+            ),
           ],
         ),
         body: BlocBuilder<CollectionDetailBloc, CollectionDetailState>(
