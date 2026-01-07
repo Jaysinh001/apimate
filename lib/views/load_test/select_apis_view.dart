@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
+import '../../config/routes/routes_name.dart';
 import '../../domain/model/collection_detail_model/collection_explorer_node.dart';
 import 'load_test_config_view.dart';
 
@@ -57,14 +57,17 @@ class _SelectApisViewState extends State<SelectApisView> {
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              children: widget.tree
-                  .map((node) => _TreeNodeWidget(
-                        node: node,
-                        search: _search,
-                        selectedIds: _selectedRequestIds,
-                        onToggle: _onToggle,
-                      ))
-                  .toList(),
+              children:
+                  widget.tree
+                      .map(
+                        (node) => _TreeNodeWidget(
+                          node: node,
+                          search: _search,
+                          selectedIds: _selectedRequestIds,
+                          onToggle: _onToggle,
+                        ),
+                      )
+                      .toList(),
             ),
           ),
 
@@ -85,9 +88,10 @@ class _SelectApisViewState extends State<SelectApisView> {
                 ),
                 const Spacer(),
                 ElevatedButton(
-                  onPressed: _selectedRequestIds.isEmpty
-                      ? null
-                      : () => _onContinue(context),
+                  onPressed:
+                      _selectedRequestIds.isEmpty
+                          ? null
+                          : () => _onContinue(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF6C9CFF),
                     padding: const EdgeInsets.symmetric(
@@ -129,17 +133,14 @@ class _SelectApisViewState extends State<SelectApisView> {
     final selectedIds = _selectedRequestIds.toList();
 
     // Example: navigate to load test config screen
-    Navigator.push(
+    // Navigate to Select Apis View
+    Navigator.pushNamed(
       context,
-      MaterialPageRoute(
-        builder: (_) => LoadTestConfigView(
-          selectedRequestIds: selectedIds,
-        ),
-      ),
+      RoutesName.loadTestConfigView,
+      arguments: selectedIds,
     );
   }
 }
-
 
 class _TreeNodeWidget extends StatelessWidget {
   final CollectionExplorerNode node;
@@ -161,14 +162,17 @@ class _TreeNodeWidget extends StatelessWidget {
     if (node.isFolder) {
       return _FolderTile(
         title: node.name,
-        children: node.children
-            .map((c) => _TreeNodeWidget(
-                  node: c,
-                  search: search,
-                  selectedIds: selectedIds,
-                  onToggle: onToggle,
-                ))
-            .toList(),
+        children:
+            node.children
+                .map(
+                  (c) => _TreeNodeWidget(
+                    node: c,
+                    search: search,
+                    selectedIds: selectedIds,
+                    onToggle: onToggle,
+                  ),
+                )
+                .toList(),
       );
     }
 
@@ -187,10 +191,7 @@ class _TreeNodeWidget extends StatelessWidget {
         value: isSelected,
         onChanged: (v) => onToggle(node.id, v ?? false),
         activeColor: const Color(0xFF6C9CFF),
-        title: Text(
-          node.name,
-          style: const TextStyle(color: Colors.white),
-        ),
+        title: Text(node.name, style: const TextStyle(color: Colors.white)),
         controlAffinity: ListTileControlAffinity.leading,
       ),
     );
@@ -203,15 +204,11 @@ class _TreeNodeWidget extends StatelessWidget {
   }
 }
 
-
 class _FolderTile extends StatelessWidget {
   final String title;
   final List<Widget> children;
 
-  const _FolderTile({
-    required this.title,
-    required this.children,
-  });
+  const _FolderTile({required this.title, required this.children});
 
   @override
   Widget build(BuildContext context) {
