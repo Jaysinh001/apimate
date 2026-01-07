@@ -1,9 +1,12 @@
+import 'dart:developer';
+
 import 'package:apimate/config/routes/routes_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/collection_detail_bloc/collection_detail_bloc.dart';
 import '../../domain/model/collection_detail_model/collection_explorer_node.dart';
+import '../../domain/repository/export/postman_export_repo.dart';
 import '../variables_view/collection_variable_view.dart';
 
 class CollectionDetailView extends StatefulWidget {
@@ -44,6 +47,17 @@ class _CollectionDetailViewState extends State<CollectionDetailView> {
                         ),
                   ),
                 );
+              },
+            ),
+
+            IconButton(
+              icon: const Icon(Icons.download),
+              onPressed: () async {
+                final repo = PostmanExportRepo();
+                final json = await repo.exportCollection(widget.collectionID);
+
+                // TODO: save to file or share
+                log(json);
               },
             ),
           ],
