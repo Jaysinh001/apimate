@@ -84,7 +84,7 @@ class _CollectionDetailViewState extends State<CollectionDetailView> {
                 return IconButton(
                   icon: const Icon(Icons.speed_rounded),
                   onPressed: () async {
-                    // Navigate to Request Detail Screen
+                    // Navigate to Select Apis View
                     Navigator.pushNamed(
                       context,
                       RoutesName.selectApisView,

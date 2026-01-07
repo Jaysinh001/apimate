@@ -1,6 +1,11 @@
+import 'package:apimate/config/utility/utility.dart';
 import 'package:flutter/material.dart';
 
 import '../../../domain/model/load_test/load_test_config.dart';
+import '../../bloc/load_test/load_test_bloc.dart';
+import '../../config/routes/routes_name.dart';
+import '../../domain/model/request_client_model/request_execution_input.dart';
+import '../../domain/repository/request_client/request_client_repo.dart';
 import 'load_test_live_view.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -272,29 +277,65 @@ class LoadTestConfigView extends StatelessWidget {
     }
   }
 
-  // ===============================================================
-  // START TEST
-  // ===============================================================
-  void _startTest(BuildContext context, LoadTestConfigState state) {
-    final config = LoadTestConfig(
-      requestedVUs: state.vus,
-      durationSeconds: state.duration,
-      profile: state.profile,
-      rampStart: state.rampStart,
-      rampEnd: state.rampEnd,
-      spikeAtSecond: state.spikeAt,
-      peakDuration: state.peakDuration,
-    );
+ // ===============================================================
+// START TEST
+// ===============================================================
+Future<void> _startTest(
+  BuildContext context,
+  LoadTestConfigState state,
+) async {
+  final config = LoadTestConfig(
+    requestedVUs: state.vus,
+    durationSeconds: state.duration,
+    profile: state.profile,
+    rampStart: state.rampStart,
+    rampEnd: state.rampEnd,
+    spikeAtSecond: state.spikeAt,
+    peakDuration: state.peakDuration,
+  );
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const LoadTestLiveView()),
-    );
+  try {
+    // 1️⃣ Load selected APIs from DB
+    final repo = RequestClientRepo();
+    final List<RequestExecutionInput> inputs = [];
 
-    // TODO:
-    // Load RequestExecutionInput from DB using selectedRequestIds
-    // context.read<LoadTestBloc>().add(StartLoadTest(...));
+    for (final id in selectedRequestIds) {
+      final requestData = await repo.loadRequest(id);
+
+    Utility.showLog("RequestData : $requestData");
+
+      inputs.add(
+        RequestExecutionInput(
+          method: requestData.method,
+          url: requestData.rawUrl,
+          headers: requestData.headers,
+          queryParams: requestData.queryParams,
+          body: requestData.body?.content,
+          contentType: requestData.body?.contentType,
+        ),
+      );
+    }
+
+    // 2️⃣ Dispatch to LoadTestBloc
+    context.read<LoadTestBloc>().add(
+          StartLoadTest(
+            requests: inputs,
+            config: config,
+          ),
+        );
+
+    // 3️⃣ Navigate to Live View
+    Navigator.pushNamed(context, RoutesName.loadTestLiveView);
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Failed to start load test: $e'),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
+
 }
 
 class _SectionCard extends StatelessWidget {
