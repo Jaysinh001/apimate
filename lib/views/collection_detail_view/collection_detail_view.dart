@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:apimate/config/routes/routes_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,7 +38,6 @@ class _CollectionDetailViewState extends State<CollectionDetailView> {
             BlocBuilder<CollectionDetailBloc, CollectionDetailState>(
               builder: (context, state) {
                 return PopupMenuButton<String>(
-                  padding: EdgeInsetsGeometry.only(right: 36),
                   onSelected: (v) async {
                     if (v == 'add_folder') {
                       showFolderSheet(
@@ -178,15 +179,21 @@ class _CollectionDetailViewState extends State<CollectionDetailView> {
 class _ExplorerNodeWidget extends StatelessWidget {
   final CollectionExplorerNode node;
   final int collectionID;
+  // padding field is used for generating the tab space at every level. We have used the Recursive method by adding 12 in previous value
+  final double padding;
 
-  const _ExplorerNodeWidget({required this.node, required this.collectionID});
+  const _ExplorerNodeWidget({
+    required this.node,
+    required this.collectionID,
+    this.padding = 12,
+  });
 
   @override
   Widget build(BuildContext context) {
     // 📁 Folder
     if (node.isFolder) {
       return ExpansionTile(
-        childrenPadding: EdgeInsets.only(left: 12),
+        tilePadding: EdgeInsets.only(left: padding),
         leading: const Icon(Icons.folder),
         title: Text(node.name),
         trailing: PopupMenuButton<String>(
@@ -227,6 +234,7 @@ class _ExplorerNodeWidget extends StatelessWidget {
                   (child) => _ExplorerNodeWidget(
                     node: child,
                     collectionID: collectionID,
+                    padding: padding + 12,
                   ),
                 )
                 .toList(),
@@ -235,6 +243,7 @@ class _ExplorerNodeWidget extends StatelessWidget {
 
     // 🔗 Request
     return ListTile(
+      contentPadding: EdgeInsets.only(left: padding , right: 12),
       leading: _MethodBadge(method: node.method ?? 'UNKNOWN'),
       title: Text(node.name),
       subtitle: Text(
