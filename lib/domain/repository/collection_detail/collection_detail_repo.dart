@@ -1,4 +1,3 @@
-
 import '../../../data/services/database_service.dart';
 import '../../model/collection_detail_model/collection_explorer_node.dart';
 
@@ -83,5 +82,119 @@ class CollectionDetailRepo {
 
     // 7️⃣ Root nodes (parentFolderId == null)
     return buildTree(null);
+  }
+
+  // ===============================
+  // FOLDER
+  // ===============================
+  Future<void> createFolder({
+    required int collectionId,
+    int? parentFolderId,
+    required String name,
+  }) async {
+    final db = await _dbService.database;
+    final now = DateTime.now().toIso8601String();
+
+    await db.insert('folders', {
+      'collection_id': collectionId,
+      'parent_folder_id': parentFolderId,
+      'name': name,
+      'sync_status': 'local',
+      'is_deleted': 0,
+      'created_at': now,
+      'updated_at': now,
+    });
+  }
+
+  Future<void> updateFolder({
+    required int folderId,
+    required String name,
+  }) async {
+    final db = await _dbService.database;
+    await db.update(
+      'folders',
+      {
+        'name': name,
+        'sync_status': 'modified',
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [folderId],
+    );
+  }
+
+  Future<void> deleteFolder(int folderId) async {
+    final db = await _dbService.database;
+    await db.update(
+      'folders',
+      {
+        'is_deleted': 1,
+        'sync_status': 'deleted',
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [folderId],
+    );
+  }
+
+  // ===============================
+  // REQUEST
+  // ===============================
+  Future<void> createRequest({
+    required int collectionId,
+    int? folderId,
+    required String name,
+    required String method,
+    required String url,
+  }) async {
+    final db = await _dbService.database;
+    final now = DateTime.now().toIso8601String();
+
+    await db.insert('requests', {
+      'collection_id': collectionId,
+      'folder_id': folderId,
+      'name': name,
+      'method': method,
+      'url': url,
+      'sync_status': 'local',
+      'is_deleted': 0,
+      'created_at': now,
+      'updated_at': now,
+    });
+  }
+
+  Future<void> updateRequest({
+    required int requestId,
+    required String name,
+    required String method,
+    required String url,
+  }) async {
+    final db = await _dbService.database;
+    await db.update(
+      'requests',
+      {
+        'name': name,
+        'method': method,
+        'url': url,
+        'sync_status': 'modified',
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [requestId],
+    );
+  }
+
+  Future<void> deleteRequest(int requestId) async {
+    final db = await _dbService.database;
+    await db.update(
+      'requests',
+      {
+        'is_deleted': 1,
+        'sync_status': 'deleted',
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [requestId],
+    );
   }
 }

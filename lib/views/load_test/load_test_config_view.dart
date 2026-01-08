@@ -277,65 +277,61 @@ class LoadTestConfigView extends StatelessWidget {
     }
   }
 
- // ===============================================================
-// START TEST
-// ===============================================================
-Future<void> _startTest(
-  BuildContext context,
-  LoadTestConfigState state,
-) async {
-  final config = LoadTestConfig(
-    requestedVUs: state.vus,
-    durationSeconds: state.duration,
-    profile: state.profile,
-    rampStart: state.rampStart,
-    rampEnd: state.rampEnd,
-    spikeAtSecond: state.spikeAt,
-    peakDuration: state.peakDuration,
-  );
+  // ===============================================================
+  // START TEST
+  // ===============================================================
+  Future<void> _startTest(
+    BuildContext context,
+    LoadTestConfigState state,
+  ) async {
+    final config = LoadTestConfig(
+      requestedVUs: state.vus,
+      durationSeconds: state.duration,
+      profile: state.profile,
+      rampStart: state.rampStart,
+      rampEnd: state.rampEnd,
+      spikeAtSecond: state.spikeAt,
+      peakDuration: state.peakDuration,
+    );
 
-  try {
-    // 1️⃣ Load selected APIs from DB
-    final repo = RequestClientRepo();
-    final List<RequestExecutionInput> inputs = [];
+    try {
+      // 1️⃣ Load selected APIs from DB
+      final repo = RequestClientRepo();
+      final List<RequestExecutionInput> inputs = [];
 
-    for (final id in selectedRequestIds) {
-      final requestData = await repo.loadRequest(id);
+      for (final id in selectedRequestIds) {
+        final requestData = await repo.loadRequest(id);
 
-    Utility.showLog("RequestData : $requestData");
+        Utility.showLog("RequestData : $requestData");
 
-      inputs.add(
-        RequestExecutionInput(
-          method: requestData.method,
-          url: requestData.rawUrl,
-          headers: requestData.headers,
-          queryParams: requestData.queryParams,
-          body: requestData.body?.content,
-          contentType: requestData.body?.contentType,
+        inputs.add(
+          RequestExecutionInput(
+            method: requestData.method,
+            url: requestData.rawUrl,
+            headers: requestData.headers,
+            queryParams: requestData.queryParams,
+            body: requestData.body?.content,
+            contentType: requestData.body?.contentType,
+          ),
+        );
+      }
+
+      // 2️⃣ Dispatch to LoadTestBloc
+      context.read<LoadTestBloc>().add(
+        StartLoadTest(requests: inputs, config: config),
+      );
+
+      // 3️⃣ Navigate to Live View
+      Navigator.pushNamed(context, RoutesName.loadTestLiveView);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to start load test: $e'),
+          backgroundColor: Colors.red,
         ),
       );
     }
-
-    // 2️⃣ Dispatch to LoadTestBloc
-    context.read<LoadTestBloc>().add(
-          StartLoadTest(
-            requests: inputs,
-            config: config,
-          ),
-        );
-
-    // 3️⃣ Navigate to Live View
-    Navigator.pushNamed(context, RoutesName.loadTestLiveView);
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Failed to start load test: $e'),
-        backgroundColor: Colors.red,
-      ),
-    );
   }
-}
-
 }
 
 class _SectionCard extends StatelessWidget {
