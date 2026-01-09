@@ -7,15 +7,10 @@ import '../../bloc/variable_bloc/variable_bloc.dart';
 import '../../domain/model/variable_model/collection_variable_model.dart';
 import '../../domain/repository/variable_repo/variable_repo.dart';
 
-
-
 class CollectionVariablesView extends StatefulWidget {
   final int collectionID;
 
-  const CollectionVariablesView({
-    super.key,
-    required this.collectionID,
-  });
+  const CollectionVariablesView({super.key, required this.collectionID});
 
   @override
   State<CollectionVariablesView> createState() =>
@@ -41,11 +36,9 @@ class _CollectionVariablesViewState extends State<CollectionVariablesView>
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => CollectionVariablesBloc(
-        repo: CollectionVariablesRepo(),
-      )..add(
-          LoadCollectionVariables(collectionID: widget.collectionID),
-        ),
+      create:
+          (_) => CollectionVariablesBloc(repo: CollectionVariablesRepo())
+            ..add(LoadCollectionVariables(collectionID: widget.collectionID)),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Variables'),
@@ -70,8 +63,6 @@ class _CollectionVariablesViewState extends State<CollectionVariablesView>
     );
   }
 }
-
-
 
 class _CollectionVariablesTab extends StatelessWidget {
   final int collectionID;
@@ -99,8 +90,7 @@ class _CollectionVariablesTab extends StatelessWidget {
 
         // Variables list
         Expanded(
-          child: BlocBuilder<CollectionVariablesBloc,
-              CollectionVariablesState>(
+          child: BlocBuilder<CollectionVariablesBloc, CollectionVariablesState>(
             builder: (context, state) {
               if (state.status == CollectionVariablesStatus.loading) {
                 return const Center(child: CircularProgressIndicator());
@@ -113,12 +103,7 @@ class _CollectionVariablesTab extends StatelessWidget {
               }
 
               if (state.variables.isEmpty) {
-                return const Center(
-                  child: Text(
-                    'No variables added yet',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                );
+                return const Center(child: Text('No variables added yet'));
               }
 
               return ListView.separated(
@@ -137,7 +122,6 @@ class _CollectionVariablesTab extends StatelessWidget {
   }
 }
 
-
 class _VariableRow extends StatefulWidget {
   final CollectionVariable variable;
 
@@ -153,8 +137,7 @@ class _VariableRowState extends State<_VariableRow> {
   @override
   void initState() {
     super.initState();
-    _controller =
-        TextEditingController(text: widget.variable.value ?? '');
+    _controller = TextEditingController(text: widget.variable.value ?? '');
   }
 
   @override
@@ -178,22 +161,22 @@ class _VariableRowState extends State<_VariableRow> {
         ),
         onSubmitted: (value) {
           context.read<CollectionVariablesBloc>().add(
-                UpdateCollectionVariable(
-                  variableID: widget.variable.id,
-                  value: value,
-                ),
-              );
+            UpdateCollectionVariable(
+              variableID: widget.variable.id,
+              value: value,
+            ),
+          );
         },
       ),
       trailing: Switch(
         value: widget.variable.isActive,
         onChanged: (value) {
           context.read<CollectionVariablesBloc>().add(
-                ToggleCollectionVariable(
-                  variableID: widget.variable.id,
-                  isActive: value,
-                ),
-              );
+            ToggleCollectionVariable(
+              variableID: widget.variable.id,
+              isActive: value,
+            ),
+          );
         },
       ),
     );
@@ -206,31 +189,32 @@ void _showAddVariableDialog(BuildContext context, int collectionID) {
 
   showDialog(
     context: context,
-    builder: (_) => AlertDialog(
-      title: const Text('Add Variable'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: keyController,
-            decoration: const InputDecoration(labelText: 'Key'),
+    builder:
+        (_) => AlertDialog(
+          title: const Text('Add Variable'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: keyController,
+                decoration: const InputDecoration(labelText: 'Key'),
+              ),
+              TextField(
+                controller: valueController,
+                decoration: const InputDecoration(labelText: 'Value'),
+              ),
+            ],
           ),
-          TextField(
-            controller: valueController,
-            decoration: const InputDecoration(labelText: 'Value'),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            if (keyController.text.trim().isEmpty) return;
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (keyController.text.trim().isEmpty) return;
 
-            context.read<CollectionVariablesBloc>().add(
+                context.read<CollectionVariablesBloc>().add(
                   AddCollectionVariable(
                     collectionID: collectionID,
                     key: keyController.text.trim(),
@@ -238,15 +222,14 @@ void _showAddVariableDialog(BuildContext context, int collectionID) {
                   ),
                 );
 
-            Navigator.pop(context);
-          },
-          child: const Text('Add'),
+                Navigator.pop(context);
+              },
+              child: const Text('Add'),
+            ),
+          ],
         ),
-      ],
-    ),
   );
 }
-
 
 class _ComingSoonTab extends StatelessWidget {
   const _ComingSoonTab();
@@ -254,13 +237,7 @@ class _ComingSoonTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text(
-        'Coming soon',
-        style: TextStyle(
-          fontSize: 16,
-          color: Colors.grey,
-        ),
-      ),
+      child: Text('Coming soon', style: TextStyle(fontSize: 16)),
     );
   }
 }

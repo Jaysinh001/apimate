@@ -1,4 +1,5 @@
 import 'package:apimate/domain/model/params_list_model.dart';
+import 'package:apimate/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -105,7 +106,7 @@ class ParamsListItem extends StatelessWidget {
       // padding: EdgeInsets.all(12),
       margin: screenConfig.padding,
       decoration: BoxDecoration(
-        color: AppColors().getCurrentColorScheme(context: context).surface,
+        color: currentTheme.surface,
         borderRadius: BorderRadius.all(Radius.circular(6)),
       ),
 
@@ -150,7 +151,7 @@ class ParamsListItem extends StatelessWidget {
           },
           child: Icon(
             Icons.delete,
-            color: AppColors().getCurrentColorScheme(context: context).primary,
+            color: currentTheme.primary,
           ),
         ),
       ),

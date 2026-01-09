@@ -6,6 +6,7 @@ import 'package:apimate/config/components/my_textfield.dart';
 import 'package:apimate/config/theme/app_theme/app_theme.dart';
 import 'package:apimate/config/theme/color/colors.dart';
 import 'package:apimate/config/utility/utility.dart';
+import 'package:apimate/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -103,7 +104,7 @@ class HeaderListItem extends StatelessWidget {
       // padding: EdgeInsets.all(12),
       margin: screenConfig.padding,
       decoration: BoxDecoration(
-        color: AppColors().getCurrentColorScheme(context: context).surface,
+        color: currentTheme.surface,
         borderRadius: BorderRadius.all(Radius.circular(6)),
       ),
 
@@ -130,7 +131,7 @@ class HeaderListItem extends StatelessWidget {
           },
           child: Icon(
             Icons.delete,
-            color: AppColors().getCurrentColorScheme(context: context).primary,
+            color: currentTheme.primary,
           ),
         ),
       ),

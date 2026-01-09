@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/request_client_bloc/request_client_bloc.dart';
 import '../../config/utility/pretty_json_helper.dart';
+import '../../main.dart';
 import 'request_actionbar_widget.dart';
 
 class RequestClientView extends StatefulWidget {
@@ -44,16 +45,20 @@ class _RequestClientViewState extends State<RequestClientView>
                 children: [
                   const Text('Request'),
                   if (state.hasUnsavedChanges)
-                    const Padding(
-                      padding: EdgeInsets.only(left: 6),
-                      child: Icon(Icons.circle, size: 8, color: Colors.orange),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: Icon(
+                        Icons.circle,
+                        size: 8,
+                        color: currentTheme.warning,
+                      ),
                     ),
                 ],
               );
             },
           ),
           actions: [
-            Text("Save", style: const TextStyle(color: Colors.grey)),
+            Text("Save"),
 
             BlocBuilder<RequestClientBloc, RequestClientState>(
               builder: (context, state) {
@@ -312,12 +317,7 @@ class ResponseTab extends StatelessWidget {
         final response = state.lastResponse;
 
         if (response == null) {
-          return const Center(
-            child: Text(
-              'No response yet',
-              style: TextStyle(color: Colors.grey),
-            ),
-          );
+          return const Center(child: Text('No response yet'));
         }
 
         final isJson = JsonPrettyHelper.isJson(response.body);
@@ -326,7 +326,8 @@ class ResponseTab extends StatelessWidget {
                 ? JsonPrettyHelper.prettyPrint(response.body)
                 : response.body;
 
-        final statusColor = response.isSuccess ? Colors.green : Colors.red;
+        final statusColor =
+            response.isSuccess ? currentTheme.success : currentTheme.error;
 
         return Column(
           children: [
@@ -336,10 +337,7 @@ class ResponseTab extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                // color: Theme.of(context).cardColor,
-                border: Border(
-                  bottom: BorderSide(color: Theme.of(context).primaryColor),
-                ),
+                border: Border(bottom: BorderSide(color: currentTheme.primary)),
               ),
               child: Row(
                 children: [
@@ -364,21 +362,15 @@ class ResponseTab extends StatelessWidget {
                   const SizedBox(width: 12),
 
                   // Time
-                  Text(
-                    '${response.durationMs} ms',
-                    style: const TextStyle(color: Colors.grey),
-                  ),
+                  Text('${response.durationMs} ms'),
 
                   const Spacer(),
 
-                  Text("Save", style: const TextStyle(color: Colors.grey)),
+                  const Text("Save"),
                   // Save response
                   IconButton(
                     tooltip: 'Save response',
-                    icon: Icon(
-                      Icons.save,
-                      color: Theme.of(context).primaryColor,
-                    ),
+                    icon: Icon(Icons.save),
                     onPressed: () {
                       context.read<RequestClientBloc>().add(
                         const SaveResponse(),
@@ -393,14 +385,11 @@ class ResponseTab extends StatelessWidget {
                     },
                   ),
 
-                  Text("Copy", style: const TextStyle(color: Colors.grey)),
+                  const Text("Copy"),
                   // Copy button
                   IconButton(
                     tooltip: 'Copy response',
-                    icon: Icon(
-                      Icons.copy,
-                      color: Theme.of(context).primaryColor,
-                    ),
+                    icon: Icon(Icons.copy),
                     onPressed:
                         response.body.isEmpty
                             ? null
@@ -425,12 +414,7 @@ class ResponseTab extends StatelessWidget {
             Expanded(
               child:
                   response.body.isEmpty
-                      ? const Center(
-                        child: Text(
-                          'Empty response body',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      )
+                      ? const Center(child: Text('Empty response body'))
                       : SingleChildScrollView(
                         padding: const EdgeInsets.all(12),
                         child: SelectableText(

@@ -12,7 +12,8 @@ import '../../domain/model/import_collection_model/raw_import_model.dart';
 part 'collection_list_event.dart';
 part 'collection_list_state.dart';
 
-class CollectionListBloc extends Bloc<CollectionListEvent, CollectionListState> {
+class CollectionListBloc
+    extends Bloc<CollectionListEvent, CollectionListState> {
   CollectionListBloc() : super(const CollectionListState()) {
     on<GetCollectionsFromLocalDB>(handleGetCollectionsFromLocalDB);
     on<CreateCollection>(handleCreateCollection);
@@ -32,11 +33,11 @@ class CollectionListBloc extends Bloc<CollectionListEvent, CollectionListState> 
 
       final res = await databaseService?.executeQuery(sqlQuery: query);
 
-      Utility.showLog("handleGetCollectionsFromLocalDB ::: $res");
+      // Utility.showLog("handleGetCollectionsFromLocalDB ::: $res");
 
       final collectionList = collectionListModelFromJson(jsonEncode(res));
 
-      Utility.showLog("collectionListModelFromJson ::: $collectionList");
+      // Utility.showLog("collectionListModelFromJson ::: $collectionList");
 
       emit(
         state.copyWith(

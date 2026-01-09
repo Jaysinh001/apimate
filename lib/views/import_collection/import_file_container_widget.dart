@@ -2,6 +2,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 
 import '../../config/theme/color/colors.dart';
+import '../../main.dart';
 
 class ImportFileContainerWidget extends StatelessWidget {
   final VoidCallback onTap;
@@ -16,15 +17,13 @@ class ImportFileContainerWidget extends StatelessWidget {
           radius: const Radius.circular(12),
           strokeWidth: 2,
           dashPattern: const [8, 4],
-          color:
-              AppColors().getCurrentColorScheme(context: context).borderColor,
+          color: currentTheme.borderColor,
         ),
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
           decoration: BoxDecoration(
-            color: AppColors()
-                .getCurrentColorScheme(context: context)
+            color: currentTheme
                 .secondary
                 .withOpacity(0.2),
             borderRadius: BorderRadius.circular(12),
@@ -35,8 +34,7 @@ class ImportFileContainerWidget extends StatelessWidget {
               Icon(
                 Icons.cloud_upload_outlined,
                 size: 56,
-                color:
-                    AppColors().getCurrentColorScheme(context: context).primary,
+                color: currentTheme.primary,
               ),
               const SizedBox(height: 16),
               Text(
@@ -45,8 +43,7 @@ class ImportFileContainerWidget extends StatelessWidget {
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                   color:
-                      AppColors()
-                          .getCurrentColorScheme(context: context)
+                      currentTheme
                           .textPrimary,
                 ),
               ),
@@ -56,8 +53,7 @@ class ImportFileContainerWidget extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   color:
-                      AppColors()
-                          .getCurrentColorScheme(context: context)
+                      currentTheme
                           .textSecondary,
                 ),
               ),

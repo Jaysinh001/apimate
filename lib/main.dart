@@ -13,7 +13,10 @@ import 'config/routes/routes_name.dart';
 import 'config/theme/app_theme/app_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'config/theme/color/colors.dart';
+
 DatabaseService? databaseService;
+dynamic currentTheme;
 void main() {
   WidgetsFlutterBinding.ensureInitialized;
   databaseService = DatabaseService.instance;
@@ -43,6 +46,11 @@ class MyApp extends StatelessWidget {
         builder: (context, state) {
           return MaterialApp(
             builder: (context, child) {
+
+
+              /// Global variable to access current theme
+                  currentTheme = AppColors().getCurrentColorScheme(context: context);
+
               final mediaQueryData = MediaQuery.of(context);
 
               // Calculate the scaled text factor using the clamp function to ensure it stays within a specified range.

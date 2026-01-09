@@ -1,7 +1,6 @@
 import 'package:apimate/config/components/my_gap.dart';
+import 'package:apimate/main.dart';
 import 'package:flutter/material.dart';
-
-import '../theme/color/colors.dart';
 
 class MyBottomsheet extends StatelessWidget {
   final List<Widget>? childerns;
@@ -26,14 +25,12 @@ class MyBottomsheet extends StatelessWidget {
             height: 3,
             width: 50,
             decoration: BoxDecoration(
-              color:
-                  AppColors().getCurrentColorScheme(context: context).primary,
+              color: currentTheme.primary,
               borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
           ),
           ...childerns ?? [],
 
-          // SizedBox(height: ),
           MyGap(gap: (MediaQuery.of(context).viewInsets.bottom + 20)),
         ],
       ),

@@ -1,4 +1,3 @@
-import 'package:apimate/bloc/api_list_bloc/api_list_bloc.dart';
 import 'package:apimate/bloc/api_request_bloc/api_request_bloc.dart';
 import 'package:apimate/config/components/my_btn.dart';
 import 'package:apimate/config/components/my_gap.dart';
@@ -17,6 +16,7 @@ import '../../config/theme/color/colors.dart';
 import '../../config/utility/screen_config.dart';
 import '../../config/utility/utility.dart';
 import '../../domain/model/get_api_list_model.dart';
+import '../../main.dart';
 
 class ApiRequestView extends StatefulWidget {
   final GetApiListModel? selectedApi;
@@ -182,10 +182,7 @@ class _ApiRequestViewState extends State<ApiRequestView>
                             child: Icon(
                               Icons.edit_note_rounded,
                               size: 20,
-                              color:
-                                  AppColors()
-                                      .getCurrentColorScheme(context: context)
-                                      .primary,
+                              color: currentTheme.primary,
                             ),
                           ),
                         ],
@@ -204,8 +201,7 @@ class _ApiRequestViewState extends State<ApiRequestView>
                             "SAVE",
                             style: TextStyle(
                               color:
-                                  AppColors()
-                                      .getCurrentColorScheme(context: context)
+                                  currentTheme
                                       .primary,
                             ),
                           ),

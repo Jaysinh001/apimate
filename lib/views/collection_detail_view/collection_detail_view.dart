@@ -1,13 +1,13 @@
-import 'dart:developer';
-
 import 'package:apimate/config/routes/routes_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/collection_detail_bloc/collection_detail_bloc.dart';
 import '../../config/utility/file_export_helper.dart';
+import '../../config/utility/utility.dart';
 import '../../domain/model/collection_detail_model/collection_explorer_node.dart';
 import '../../domain/repository/export/postman_export_repo.dart';
+import '../../main.dart';
 import '../variables_view/collection_variable_view.dart';
 
 class CollectionDetailView extends StatefulWidget {
@@ -243,7 +243,7 @@ class _ExplorerNodeWidget extends StatelessWidget {
 
     // 🔗 Request
     return ListTile(
-      contentPadding: EdgeInsets.only(left: padding , right: 12),
+      contentPadding: EdgeInsets.only(left: padding, right: 12),
       leading: _MethodBadge(method: node.method ?? 'UNKNOWN'),
       title: Text(node.name),
       subtitle: Text(
@@ -284,7 +284,7 @@ class _MethodBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = _getMethodColor(method);
+    final Color color = Utility.getMethodColor(method);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -301,21 +301,6 @@ class _MethodBadge extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Color _getMethodColor(String method) {
-    switch (method.toUpperCase()) {
-      case 'GET':
-        return Colors.green;
-      case 'POST':
-        return Colors.blue;
-      case 'PUT':
-        return Colors.orange;
-      case 'DELETE':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
   }
 }
 
@@ -371,9 +356,9 @@ void showFolderSheet({
                         );
                         Navigator.pop(context);
                       },
-                      child: const Text(
+                      child: Text(
                         'Delete',
-                        style: TextStyle(color: Colors.red),
+                        style: TextStyle(color: currentTheme.error),
                       ),
                     ),
                   const Spacer(),
@@ -479,9 +464,9 @@ void showRequestSheet({
                         );
                         Navigator.pop(context);
                       },
-                      child: const Text(
+                      child: Text(
                         'Delete',
-                        style: TextStyle(color: Colors.red),
+                        style: TextStyle(color: currentTheme.error),
                       ),
                     ),
                   const Spacer(),

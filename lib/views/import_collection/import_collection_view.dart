@@ -21,7 +21,6 @@ class _ImportCollectionViewState extends State<ImportCollectionView> {
   ImportCollectionBloc bloc = ImportCollectionBloc();
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 
@@ -72,13 +71,10 @@ class _ImportCollectionViewState extends State<ImportCollectionView> {
                     },
                     label: MyText.bodyLarge(
                       "Import Collection",
-                      style: TextStyle(color: Colors.white),
+                      // style: TextStyle(color: Colors.white),
                     ),
 
-                    icon: Icon(
-                      Icons.cloud_download_outlined,
-                      color: Colors.white,
-                    ),
+                    icon: Icon(Icons.cloud_download_outlined),
                   )
                   : null,
           body: SafeArea(
