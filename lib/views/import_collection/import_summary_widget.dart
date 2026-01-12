@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 
 import '../../config/utility/utility.dart';
 import '../../domain/model/import_collection_model/preview_node_model.dart';
+import '../../main.dart';
 
 class ImportSummary extends StatelessWidget {
   final int folderCount;
   final int requestCount;
 
-  const ImportSummary({super.key, 
+  const ImportSummary({
+    super.key,
     required this.folderCount,
     required this.requestCount,
   });
@@ -19,7 +21,7 @@ class ImportSummary extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors().getCurrentColorScheme(context: context).surface,
+        color: currentTheme.surface,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -44,28 +46,24 @@ class _SummaryItem extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.labelMedium,
-        ),
+        Text(label, style: Theme.of(context).textTheme.labelMedium),
         const SizedBox(height: 4),
         Text(
           value.toString(),
-          style: Theme.of(context)
-              .textTheme
-              .headlineSmall
-              ?.copyWith(fontWeight: FontWeight.bold , color: AppColors().getCurrentColorScheme(context: context).textPrimary),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: currentTheme.textPrimary,
+          ),
         ),
       ],
     );
   }
 }
 
-
 class PreviewTreeNode extends StatelessWidget {
   final ImportPreviewNode node;
 
-  const PreviewTreeNode({required this.node});
+  const PreviewTreeNode({super.key, required this.node});
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +72,8 @@ class PreviewTreeNode extends StatelessWidget {
       return ExpansionTile(
         leading: const Icon(Icons.folder),
         title: Text(node.name),
-        children: node.children
+        children:
+            node.children
                 ?.map((child) => PreviewTreeNode(node: child))
                 .toList() ??
             [],
@@ -99,22 +98,7 @@ class _MethodBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     Color color;
 
-    switch (method) {
-      case 'GET':
-        color = Colors.green;
-        break;
-      case 'POST':
-        color = Colors.blue;
-        break;
-      case 'PUT':
-        color = Colors.orange;
-        break;
-      case 'DELETE':
-        color = Colors.red;
-        break;
-      default:
-        color = Colors.grey;
-    }
+    color = Utility.getMethodColor(method);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -133,4 +117,3 @@ class _MethodBadge extends StatelessWidget {
     );
   }
 }
-

@@ -10,7 +10,7 @@ class AppColors {
   static const gruvbox = _GruvboxColors();
   static const nord = _NordColors();
 
-  dynamic getCurrentColorScheme({required BuildContext context}) {
+  static dynamic getCurrentColorScheme({required BuildContext context}) {
     var theme = context.read<ThemeBloc>().state.theme;
 
     switch (theme) {
@@ -76,6 +76,10 @@ class _DraculaColors {
   Color get chartPrimary => const Color(0xFFBD93F9);
   Color get chartSecondary => const Color(0xFFFF79C6);
   Color get chartGrid => const Color(0xFF44475A);
+  Color get chartActiveVUs => const Color(0xFF50FA7B); // Neon Green
+  Color get chartRps => const Color(0xFF8BE9FD); // Cyan
+  Color get chartLatency => const Color(0xFFFFB86C); // Orange
+  Color get chartError => const Color(0xFFFF5555); // Red
 }
 
 class _MonokaiColors {
@@ -126,6 +130,10 @@ class _MonokaiColors {
   Color get chartPrimary => const Color(0xFFF92672);
   Color get chartSecondary => const Color(0xFFA6E22E);
   Color get chartGrid => const Color(0xFF49483E);
+  Color get chartActiveVUs => const Color(0xFFA6E22E); // Green
+  Color get chartRps => const Color(0xFF66D9EF); // Blue
+  Color get chartLatency => const Color(0xFFF4BF75); // Amber
+  Color get chartError => const Color(0xFFF92672); // Magenta Red
 }
 
 class _SolarizedColors {
@@ -176,6 +184,10 @@ class _SolarizedColors {
   Color get chartPrimary => const Color(0xFF268BD2);
   Color get chartSecondary => const Color(0xFF2AA198);
   Color get chartGrid => const Color(0xFF93A1A1);
+  Color get chartActiveVUs => const Color(0xFF859900); // Green
+  Color get chartRps => const Color(0xFF268BD2); // Blue
+  Color get chartLatency => const Color(0xFFB58900); // Yellow
+  Color get chartError => const Color(0xFFDC322F); // Red
 }
 
 class _GruvboxColors {
@@ -226,6 +238,10 @@ class _GruvboxColors {
   Color get chartPrimary => const Color(0xFFFB4934);
   Color get chartSecondary => const Color(0xFFB8BB26);
   Color get chartGrid => const Color(0xFF504945);
+  Color get chartActiveVUs => const Color(0xFFB8BB26); // Olive Green
+  Color get chartRps => const Color(0xFF83A598); // Aqua
+  Color get chartLatency => const Color(0xFFFABD2F); // Yellow
+  Color get chartError => const Color(0xFFFB4934); // Red
 }
 
 class _NordColors {
@@ -276,4 +292,8 @@ class _NordColors {
   Color get chartPrimary => const Color(0xFF81A1C1);
   Color get chartSecondary => const Color(0xFF88C0D0);
   Color get chartGrid => const Color(0xFF434C5E);
+  Color get chartActiveVUs => const Color(0xFFA3BE8C); // Green
+  Color get chartRps => const Color(0xFF88C0D0); // Light Blue
+  Color get chartLatency => const Color(0xFFEBCB8B); // Yellow
+  Color get chartError => const Color(0xFFBF616A); // Red
 }

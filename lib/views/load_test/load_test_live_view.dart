@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 import '../../bloc/load_test/load_test_bloc.dart';
+import '../../main.dart';
 
 class LoadTestLiveView extends StatelessWidget {
   const LoadTestLiveView({super.key});
@@ -10,25 +13,23 @@ class LoadTestLiveView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1220),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color(0xFF0F1220),
         title: const Text('Live Load Test'),
         actions: [
           TextButton.icon(
             onPressed: () {
               context.read<LoadTestBloc>().add(StopLoadTest());
             },
-            icon: const Icon(Icons.stop_circle_outlined, color: Colors.red),
-            label: const Text('Stop', style: TextStyle(color: Colors.red)),
+            icon: Icon(Icons.stop_circle_outlined, color: currentTheme.error),
+            label: Text('Stop', style: TextStyle(color: currentTheme.error)),
           ),
         ],
       ),
       body: SafeArea(
         child: BlocBuilder<LoadTestBloc, LoadTestState>(
-          buildWhen: (p, c) =>
-              p.status != c.status || p.liveMetrics != c.liveMetrics,
+          buildWhen:
+              (p, c) => p.status != c.status || p.liveMetrics != c.liveMetrics,
           builder: (context, state) {
             if (state.status == LoadTestStatus.initial) {
               return const Center(child: Text('Not started'));
@@ -38,7 +39,7 @@ class LoadTestLiveView extends StatelessWidget {
               return Center(
                 child: Text(
                   state.message ?? 'Something went wrong',
-                  style: const TextStyle(color: Colors.red),
+                  style: TextStyle(color: currentTheme.error),
                 ),
               );
             }
@@ -59,25 +60,25 @@ class LoadTestLiveView extends StatelessWidget {
                       _KpiCard(
                         title: 'Active VUs',
                         value: metrics.activeUsers.toString(),
-                        accent: const Color(0xFF6C9CFF),
+                        accent: currentTheme.chartActiveVUs,
                       ),
                       const SizedBox(width: 12),
                       _KpiCard(
                         title: 'RPS',
                         value: metrics.rps.toStringAsFixed(1),
-                        accent: const Color(0xFF22C55E),
+                        accent: currentTheme.chartRps,
                       ),
                       const SizedBox(width: 12),
                       _KpiCard(
-                        title: 'Avg Latency',
-                        value: '${metrics.avgLatencyMs.toStringAsFixed(0)} ms',
-                        accent: const Color(0xFFF59E0B),
+                        title: 'Avg Latency (ms)',
+                        value: metrics.avgLatencyMs.toStringAsFixed(0),
+                        accent: currentTheme.chartLatency,
                       ),
                       const SizedBox(width: 12),
                       _KpiCard(
                         title: 'Error %',
                         value: metrics.errorRate.toStringAsFixed(1),
-                        accent: const Color(0xFFEF4444),
+                        accent: currentTheme.chartError,
                       ),
                     ],
                   ),
@@ -94,10 +95,10 @@ class LoadTestLiveView extends StatelessWidget {
                     child: GridView(
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 1,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 1.6,
-                      ),
+                            crossAxisCount: 1,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 1.6,
+                          ),
                       children: [
                         _ChartCard(
                           title: 'Requests Per Second',
@@ -106,9 +107,9 @@ class LoadTestLiveView extends StatelessWidget {
                               metrics.series,
                               (p) => p.rps,
                             ),
-                            gradient: const [
-                              Color(0xFF22C55E),
-                              Color(0xFF16A34A),
+                            gradient: [
+                              currentTheme.chartRps.withOpacity(0.5),
+                              currentTheme.chartRps,
                             ],
                             yLabel: 'RPS',
                           ),
@@ -120,9 +121,9 @@ class LoadTestLiveView extends StatelessWidget {
                               metrics.series,
                               (p) => p.avgLatencyMs,
                             ),
-                            gradient: const [
-                              Color(0xFFF59E0B),
-                              Color(0xFFD97706),
+                            gradient: [
+                              currentTheme.chartLatency.withOpacity(0.5),
+                              currentTheme.chartLatency,
                             ],
                             yLabel: 'ms',
                           ),
@@ -134,9 +135,9 @@ class LoadTestLiveView extends StatelessWidget {
                               metrics.series,
                               (p) => p.errorRate,
                             ),
-                            gradient: const [
-                              Color(0xFFEF4444),
-                              Color(0xFFDC2626),
+                            gradient: [
+                              currentTheme.chartError.withOpacity(0.5),
+                              currentTheme.chartError,
                             ],
                             yLabel: '%',
                           ),
@@ -188,7 +189,7 @@ class _KpiCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF141834),
+          color: currentTheme.cardBackground,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: accent.withOpacity(0.25)),
           boxShadow: [
@@ -202,11 +203,7 @@ class _KpiCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
-                  fontSize: 12,
-                )),
+            Text(title, style: TextStyle(fontSize: 12)),
             const SizedBox(height: 6),
             Text(
               value,
@@ -234,18 +231,14 @@ class _ChartCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF141834),
+        color: currentTheme.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: currentTheme.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              )),
+          Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Expanded(child: child),
         ],
@@ -282,13 +275,14 @@ class _LineChart extends StatelessWidget {
             sideTitles: SideTitles(
               showTitles: true,
               interval: _autoInterval(spots),
-              getTitlesWidget: (value, meta) => Text(
-                value.toInt().toString(),
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
-                  fontSize: 10,
-                ),
-              ),
+              getTitlesWidget:
+                  (value, meta) => Text(
+                    value.toInt().toString(),
+                    style: TextStyle(
+                      color: currentTheme.textPrimary.withOpacity(0.5),
+                      fontSize: 10,
+                    ),
+                  ),
             ),
           ),
         ),
@@ -321,7 +315,15 @@ class _LineChart extends StatelessWidget {
 
   static double _autoInterval(List<FlSpot> spots) {
     if (spots.isEmpty) return 1;
+
     final maxY = spots.map((e) => e.y).reduce((a, b) => a > b ? a : b);
-    return maxY <= 10 ? 1 : maxY <= 100 ? 10 : 50;
+
+    if (maxY <= 0) return 1;
+
+    // Find next power of 10
+    final magnitude = pow(10, (log(maxY) / ln10).ceil()).toDouble();
+
+    // Divide into 5 grid lines
+    return magnitude / 5;
   }
 }

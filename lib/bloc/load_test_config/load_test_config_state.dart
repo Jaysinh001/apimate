@@ -21,15 +21,15 @@ class LoadTestConfigState extends Equatable {
 
   const LoadTestConfigState({
     this.status = LoadTestConfigStatus.initial,
-    this.maxDeviceVUs = 50,
+    this.maxDeviceVUs = 500,
     this.message,
     this.vus = 10,
     this.duration = 30,
     this.profile = LoadProfileType.fixed,
     this.rampStart = 1,
-    this.rampEnd = 20,
-    this.spikeAt = 10,
-    this.peakDuration = 10,
+    this.rampEnd = 10,
+    this.spikeAt = 5,
+    this.peakDuration = 5,
   });
 
   LoadTestConfigState copyWith({
@@ -60,15 +60,15 @@ class LoadTestConfigState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        maxDeviceVUs,
-        message,
-        vus,
-        duration,
-        profile,
-        rampStart,
-        rampEnd,
-        spikeAt,
-        peakDuration,
-      ];
+    status,
+    maxDeviceVUs,
+    message,
+    vus,
+    duration,
+    profile,
+    rampStart,
+    rampEnd,
+    spikeAt,
+    peakDuration,
+  ];
 }

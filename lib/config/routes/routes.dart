@@ -1,5 +1,4 @@
 import 'package:apimate/views/api_collections/api_collections.dart';
-import 'package:apimate/views/api_list/api_list.dart';
 import 'package:apimate/views/collection_detail_view/collection_detail_view.dart';
 import 'package:apimate/views/import_collection/import_collection_view.dart';
 import 'package:apimate/views/load_test/load_test_config_view.dart';
@@ -9,8 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../../domain/model/collection_detail_model/collection_explorer_node.dart';
-import '../../domain/model/get_api_list_model.dart';
-import '../../views/api_request/api_response_view.dart';
 import '../../views/request_client/request_client_view.dart';
 import '../../views/views.dart';
 import 'routes_name.dart';
@@ -20,11 +17,7 @@ class Routes {
     switch (settings.name) {
       case RoutesName.splashView:
         return MaterialPageRoute(builder: (context) => const SplashView());
-      case RoutesName.apiRequestView:
-        GetApiListModel? apiData = settings.arguments as GetApiListModel?;
-        return MaterialPageRoute(
-          builder: (context) => ApiRequestView(selectedApi: apiData),
-        );
+     
       case RoutesName.apiCollections:
         return MaterialPageRoute(
           builder: (context) => const ApiCollectionsScreen(),
@@ -57,20 +50,6 @@ class Routes {
             builder: (context) => const DefaultRouteScreenView(),
           );
         }
-
-      case RoutesName.apiList:
-        return MaterialPageRoute(
-          builder:
-              (context) =>
-                  ApiListScreen(collectionID: settings.arguments as int),
-        );
-      case RoutesName.apiResponseView:
-        return MaterialPageRoute(
-          builder:
-              (context) => ApiResponseView(
-                response: settings.arguments as http.Response,
-              ),
-        );
       case RoutesName.selectApisView:
         return MaterialPageRoute(
           builder:

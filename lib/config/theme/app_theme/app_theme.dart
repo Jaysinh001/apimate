@@ -1,3 +1,4 @@
+import 'package:apimate/main.dart';
 import 'package:flutter/material.dart';
 import '../../../bloc/theme_bloc/theme_bloc.dart';
 import '../color/colors.dart';
@@ -122,6 +123,12 @@ class AppTheme {
       // =====================================================
       // BUTTONS
       // =====================================================
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: colors.primary,
+        foregroundColor: colors.textPrimary
+        
+      ),
+
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: colors.primary,
@@ -187,7 +194,7 @@ class AppTheme {
       listTileTheme: ListTileThemeData(
         iconColor: colors.textSecondary,
         textColor: colors.textPrimary,
-        tileColor: colors.cardBackground,
+        // tileColor: colors.cardBackground,
         selectedColor: colors.primary,
         selectedTileColor: colors.selection,
       ),

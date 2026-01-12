@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:apimate/config/components/my_gap.dart';
 import 'package:apimate/config/components/my_text.dart';
+import 'package:apimate/main.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
@@ -18,15 +19,8 @@ class Utility {
 
   static void showToastMessage(String message, BuildContext context) {
     final snackBar = SnackBar(
-      content: Text(
-        message,
-        style: TextStyle(
-          color:
-              AppColors().getCurrentColorScheme(context: context).textPrimary,
-        ),
-      ),
-      backgroundColor:
-          AppColors().getCurrentColorScheme(context: context).surface,
+      content: Text(message, style: TextStyle(color: currentTheme.textPrimary)),
+      backgroundColor: currentTheme.surface,
       behavior: SnackBarBehavior.floating,
       shape: const RoundedRectangleBorder(
         // borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
@@ -109,7 +103,7 @@ class Utility {
     _isLoaderShowing = true;
 
     var spinkit = SpinKitPouringHourGlassRefined(
-      color: AppColors().getCurrentColorScheme(context: context).primary,
+      color: currentTheme.primary,
       size: 50.0,
     );
 
@@ -129,12 +123,7 @@ class Utility {
                 MyGap(gap: 8),
                 MyText.bodyLarge(
                   title ?? "Please wait!",
-                  style: TextStyle(
-                    color:
-                        AppColors()
-                            .getCurrentColorScheme(context: context)
-                            .primary,
-                  ),
+                  style: TextStyle(color: currentTheme.primary),
                 ),
               ],
             ),
@@ -161,5 +150,26 @@ class Utility {
     });
 
     _isLoaderShowing = false;
+  }
+
+  static Color getMethodColor(String method) {
+    Color color;
+    switch (method.toUpperCase()) {
+      case 'GET':
+        color = currentTheme.getMethod;
+        break;
+      case 'POST':
+        color = currentTheme.postMethod;
+        break;
+      case 'PUT':
+        color = currentTheme.putMethod;
+        break;
+      case 'DELETE':
+        color = currentTheme.deleteMethod;
+        break;
+      default:
+        color = currentTheme.secondary;
+    }
+    return color;
   }
 }

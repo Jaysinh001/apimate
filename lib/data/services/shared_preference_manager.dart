@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../bloc/theme_bloc/theme_bloc.dart';
+import '../../domain/repository/load_test/device_benchmark_service.dart';
 
 // Extension method to easily convert between Enum and String
 extension ThemeNamesExtension on ThemeNames {
@@ -43,6 +46,45 @@ class SharedPreferencesManager {
     }
     final String? themeValue = _prefs?.getString("appTheme");
     return ThemeNamesExtension.fromValue(themeValue) ?? ThemeNames.dracula;
+  }
+
+  //Specific method for Device Benchmark (RECOMMENDED)
+  Future<void> setDeviceBenchmark(BenchmarkResult benchmark) async {
+    try {
+      if (_prefs == null) {
+        await init(); // Ensure _prefs is initialized
+      }
+
+      final resultJSON = benchmark.toJson();
+
+      final resultStr = jsonEncode(resultJSON);
+
+      await _prefs?.setString("deviceBenchmark", resultStr);
+    } catch (e) {
+      throw "Failed to set Benchmark to shared preference";
+    }
+  }
+
+  BenchmarkResult? getDeviceBenchmark() {
+    try {
+      if (_prefs == null) {
+        init();
+      }
+
+      final String? benchmarkStr = _prefs?.getString("deviceBenchmark");
+
+      if (benchmarkStr == null) {
+        return null;
+      }
+
+      final benchmarkJSON = jsonDecode(benchmarkStr);
+
+      BenchmarkResult benchmark = BenchmarkResult.fromJson(benchmarkJSON);
+
+      return benchmark;
+    } catch (e) {
+      return null;
+    }
   }
 
   // Clear all data (for testing or reset)

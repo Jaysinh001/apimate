@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../config/utility/utility.dart';
 import '../../domain/model/request_client_model/request_client_data_model.dart';
 import '../../domain/model/request_client_model/request_draft_model.dart';
 import '../../domain/model/request_client_model/request_execution_input.dart';
@@ -351,7 +352,7 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
         ),
       );
     } catch (e) {
-      log("_handleSaveRequestDraft : $e ");
+      Utility.showLog("_handleSaveRequestDraft : $e ");
 
       emit(
         state.copyWith(

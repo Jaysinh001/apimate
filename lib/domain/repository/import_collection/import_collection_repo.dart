@@ -340,20 +340,20 @@ class ImportCollectionRepo {
   Future<void> _insertCollectionVariables({
     required Transaction txn,
     required int collectionId,
-    required List<dynamic>? variables,
+    required List<PostmanVariable>? variables,
   }) async {
     if (variables == null || variables.isEmpty) return;
 
     final now = DateTime.now().toIso8601String();
 
     for (final variable in variables) {
-      final key = variable['key'];
+      final key = variable.key;
       if (key == null || key.toString().trim().isEmpty) continue;
 
       await txn.insert('collection_variables', {
         'collection_id': collectionId,
         'key': key,
-        'value': variable['value']?.toString(),
+        'value': variable.value?.toString(),
         'is_active': 1,
         'sync_status': 'local',
         'is_deleted': 0,

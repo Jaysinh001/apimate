@@ -1,4 +1,6 @@
+import 'package:apimate/config/components/my_btn.dart';
 import 'package:apimate/config/utility/utility.dart';
+import 'package:apimate/main.dart';
 import 'package:flutter/material.dart';
 
 import '../../../domain/model/load_test/load_test_config.dart';
@@ -6,7 +8,6 @@ import '../../bloc/load_test/load_test_bloc.dart';
 import '../../config/routes/routes_name.dart';
 import '../../domain/model/request_client_model/request_execution_input.dart';
 import '../../domain/repository/request_client/request_client_repo.dart';
-import 'load_test_live_view.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,24 +23,49 @@ class LoadTestConfigView extends StatelessWidget {
     return BlocProvider(
       create: (_) => LoadTestConfigBloc()..add(LoadDeviceBenchmark()),
       child: Scaffold(
-        backgroundColor: const Color(0xFF0F1220),
         appBar: AppBar(
           elevation: 0,
-          backgroundColor: const Color(0xFF0F1220),
           title: const Text('Load Test Configuration'),
         ),
         body: SafeArea(
           child: BlocBuilder<LoadTestConfigBloc, LoadTestConfigState>(
             builder: (context, state) {
               if (state.status == LoadTestConfigStatus.loading) {
-                return const Center(child: CircularProgressIndicator());
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 16),
+                      Text(
+                        "Analyzing device capacity…",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: currentTheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        "This usually takes around 15-30 seconds",
+                        style: TextStyle(fontSize: 13),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        "Please keep the app open and avoid switching apps",
+                        style: TextStyle(fontSize: 12),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                );
               }
 
               if (state.status == LoadTestConfigStatus.error) {
                 return Center(
                   child: Text(
                     state.message ?? 'Failed to load device benchmark',
-                    style: const TextStyle(color: Colors.red),
+                    style: TextStyle(color: currentTheme.error),
                   ),
                 );
               }
@@ -53,16 +79,12 @@ class LoadTestConfigView extends StatelessWidget {
                     // =============================
                     Row(
                       children: [
-                        const Icon(
-                          Icons.phone_iphone,
-                          size: 16,
-                          color: Colors.white70,
-                        ),
+                        const Icon(Icons.phone_iphone, size: 16),
                         const SizedBox(width: 6),
                         Text(
                           'Max Supported VUs: ${state.maxDeviceVUs}',
-                          style: const TextStyle(
-                            color: Colors.white70,
+                          style: TextStyle(
+                            color: currentTheme.primary,
                             fontSize: 13,
                           ),
                         ),
@@ -78,9 +100,6 @@ class LoadTestConfigView extends StatelessWidget {
                                   },
                           icon: const Icon(Icons.refresh, size: 16),
                           label: const Text('Recalibrate'),
-                          style: TextButton.styleFrom(
-                            foregroundColor: const Color(0xFF6C9CFF),
-                          ),
                         ),
                       ],
                     ),
@@ -93,32 +112,26 @@ class LoadTestConfigView extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1A1F3D),
+                        color: currentTheme.cardBackground,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: Colors.orange.withOpacity(0.4),
-                        ),
+                        border: Border.all(color: currentTheme.warning),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Icon(
                             Icons.warning_amber_rounded,
-                            color: Colors.orange,
+                            color: currentTheme.warning,
                             size: 20,
                           ),
-                          SizedBox(width: 8),
-                          Expanded(
+                          const SizedBox(width: 8),
+                          const Expanded(
                             child: Text(
                               'For accurate results:\n'
                               '• Close other running apps\n'
                               '• Use a stable internet connection\n'
                               '• Device may heat during tests',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 13,
-                                height: 1.4,
-                              ),
+                              style: TextStyle(fontSize: 13, height: 1.4),
                             ),
                           ),
                         ],
@@ -187,25 +200,9 @@ class LoadTestConfigView extends StatelessWidget {
                     // =============================
                     // START
                     // =============================
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => _startTest(context, state),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF6C9CFF),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        child: const Text(
-                          'Start Load Test',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
+                    MyBtn(
+                      onBtnTap: () => _startTest(context, state),
+                      title: "Start Load Test",
                     ),
                   ],
                 ),
@@ -225,10 +222,15 @@ class LoadTestConfigView extends StatelessWidget {
       case LoadProfileType.fixed:
         return const Text(
           'Fixed: Runs with constant users for the entire duration.',
-          style: TextStyle(color: Colors.white70),
         );
 
       case LoadProfileType.rampUp:
+        if (state.vus < 2) {
+          return const Text(
+            'Load test in RAMPUP profile needs atleast 2 Virtual Users.',
+          );
+        }
+
         return Column(
           children: [
             _SliderField(
@@ -345,20 +347,14 @@ class _SectionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF141834),
+        color: currentTheme.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: currentTheme.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 12),
           child,
         ],
@@ -384,11 +380,11 @@ class _ProfileSelector extends StatelessWidget {
               label: Text(type.name.toUpperCase()),
               selected: isActive,
               onSelected: (_) => onChanged(type),
-              selectedColor: const Color(0xFF6C9CFF),
-              backgroundColor: const Color(0xFF1A1F3D),
-              labelStyle: TextStyle(
-                color: isActive ? Colors.white : Colors.white70,
-              ),
+              selectedColor: currentTheme.primary,
+              backgroundColor: currentTheme.panelBackground,
+              // labelStyle: TextStyle(
+              //   color: isActive ? Colors.white : Colors.white70,
+              // ),
             );
           }).toList(),
     );
@@ -417,12 +413,12 @@ class _SliderField extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text(label, style: const TextStyle(color: Colors.white70)),
+            Text(label),
             const Spacer(),
             Text(
               value.toString(),
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: currentTheme.primary,
                 fontWeight: FontWeight.w600,
               ),
             ),
