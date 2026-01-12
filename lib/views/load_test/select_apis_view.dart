@@ -1,9 +1,9 @@
+import 'package:apimate/config/components/my_btn.dart';
+import 'package:apimate/main.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../config/routes/routes_name.dart';
 import '../../domain/model/collection_detail_model/collection_explorer_node.dart';
-import 'load_test_config_view.dart';
 
 class SelectApisView extends StatefulWidget {
   final List<CollectionExplorerNode> tree;
@@ -21,12 +21,7 @@ class _SelectApisViewState extends State<SelectApisView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1220),
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: const Color(0xFF0F1220),
-        title: const Text('Select APIs'),
-      ),
+      appBar: AppBar(elevation: 0, title: const Text('Select APIs')),
       body: Column(
         children: [
           // =============================
@@ -35,19 +30,8 @@ class _SelectApisViewState extends State<SelectApisView> {
           Padding(
             padding: const EdgeInsets.all(12),
             child: TextField(
-              style: const TextStyle(color: Colors.white),
               onChanged: (v) => setState(() => _search = v.toLowerCase()),
-              decoration: InputDecoration(
-                hintText: 'Search APIs...',
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
-                filled: true,
-                fillColor: const Color(0xFF141834),
-                prefixIcon: const Icon(Icons.search, color: Colors.white70),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-              ),
+              decoration: InputDecoration(hintText: 'Search APIs...'),
             ),
           ),
 
@@ -76,33 +60,22 @@ class _SelectApisViewState extends State<SelectApisView> {
           // =============================
           Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            decoration: const BoxDecoration(
-              color: Color(0xFF141834),
-              border: Border(top: BorderSide(color: Colors.white10)),
+            decoration: BoxDecoration(
+              color: currentTheme.selection,
+              border: Border(top: BorderSide(color: currentTheme.borderColor)),
             ),
             child: Row(
               children: [
-                Text(
-                  'Selected: ${_selectedRequestIds.length} APIs',
-                  style: const TextStyle(color: Colors.white70),
-                ),
+                Text('Selected: ${_selectedRequestIds.length} APIs'),
                 const Spacer(),
-                ElevatedButton(
-                  onPressed:
+
+                MyBtn(
+                  onBtnTap:
                       _selectedRequestIds.isEmpty
                           ? null
                           : () => _onContinue(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6C9CFF),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 14,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: const Text('Continue'),
+                  isExpanded: false,
+                  title: "Continue",
                 ),
               ],
             ),
@@ -183,15 +156,12 @@ class _TreeNodeWidget extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFF141834),
-        borderRadius: BorderRadius.circular(12),
-      ),
+
       child: CheckboxListTile(
         value: isSelected,
         onChanged: (v) => onToggle(node.id, v ?? false),
-        activeColor: const Color(0xFF6C9CFF),
-        title: Text(node.name, style: const TextStyle(color: Colors.white)),
+
+        title: Text(node.name),
         controlAffinity: ListTileControlAffinity.leading,
       ),
     );
@@ -212,20 +182,15 @@ class _FolderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ExpansionTile(
-      collapsedBackgroundColor: const Color(0xFF141834),
-      backgroundColor: const Color(0xFF141834),
-      iconColor: Colors.white70,
-      collapsedIconColor: Colors.white54,
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-        ),
+    return ClipRRect(
+      borderRadius: BorderRadius.all(Radius.circular(12)),
+      child: ExpansionTile(
+        backgroundColor: currentTheme.cardBackground,
+
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+        childrenPadding: const EdgeInsets.fromLTRB(12, 0, 0, 8),
+        children: children,
       ),
-      childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-      children: children,
     );
   }
 }

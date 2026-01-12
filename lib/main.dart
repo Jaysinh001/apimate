@@ -42,10 +42,8 @@ class MyApp extends StatelessWidget {
         builder: (context, state) {
           return MaterialApp(
             builder: (context, child) {
-
-
               /// Global variable to access current theme
-                  currentTheme = AppColors().getCurrentColorScheme(context: context);
+              currentTheme = AppColors.getCurrentColorScheme(context: context);
 
               final mediaQueryData = MediaQuery.of(context);
 

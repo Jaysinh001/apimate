@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import '../../model/request_client_model/request_execution_input.dart';
 import '../request_client/request_execution_service.dart';
@@ -7,12 +6,15 @@ import '../request_client/request_execution_service.dart';
 /// ===============================================================
 /// DEVICE BENCHMARK SERVICE
 /// ---------------------------------------------------------------
-/// Runs a micro-benchmark on the device to determine:
+/// Runs an adaptive micro-benchmark on the device to determine:
 /// - Maximum stable concurrency (Virtual Users)
 /// - Baseline latency
 /// - Degradation point
 ///
-/// This is used to cap load testing on mobile devices.
+/// Uses progressive scaling instead of fixed caps (e.g., 50 VUs)
+/// to discover the *real* capacity of the phone.
+///
+/// This value is used to cap load testing on mobile devices.
 /// ===============================================================
 
 class DeviceBenchmarkService {
@@ -27,14 +29,27 @@ class DeviceBenchmarkService {
     String method = 'GET',
     Duration timeout = const Duration(seconds: 8),
   }) async {
-    // Concurrency steps (can be tuned later)
-    final List<int> steps = [2, 5, 10, 15, 20, 30, 40, 50];
-
     double? baselineLatency;
     int? maxStable;
     int? degradationPoint;
 
-    for (final concurrency in steps) {
+    // ------------------------------------------------------------
+    // Warm-up run (avoid cold-start bias)
+    // ------------------------------------------------------------
+    await _runWave(
+      concurrency: 2,
+      testUrl: testUrl,
+      method: method,
+      timeout: timeout,
+    );
+
+    // ------------------------------------------------------------
+    // Adaptive progressive scaling
+    // ------------------------------------------------------------
+    int concurrency = 5;
+    const int maxLimit = 500; // safety cap to protect devices
+
+    while (concurrency <= maxLimit) {
       final metrics = await _runWave(
         concurrency: concurrency,
         testUrl: testUrl,
@@ -42,7 +57,7 @@ class DeviceBenchmarkService {
         timeout: timeout,
       );
 
-      // Capture baseline from first run
+      // Capture baseline from first real run
       baselineLatency ??= metrics.averageLatencyMs;
 
       final bool isDegrading = _isDegrading(
@@ -57,10 +72,19 @@ class DeviceBenchmarkService {
       }
 
       maxStable = concurrency;
+
+      // Progressive ramp strategy
+      if (concurrency < 50) {
+        concurrency += 5;
+      } else if (concurrency < 150) {
+        concurrency += 10;
+      } else {
+        concurrency += 25;
+      }
     }
 
     return BenchmarkResult(
-      maxStableConcurrency: maxStable ?? steps.first,
+      maxStableConcurrency: maxStable ?? 5,
       baselineLatencyMs: baselineLatency?.round() ?? 0,
       degradationPoint: degradationPoint,
       testedAt: DateTime.now(),
@@ -150,15 +174,15 @@ class DeviceBenchmarkService {
     required double avgLatencyMs,
     required double errorRate,
   }) {
-    // Thresholds (can be tuned)
+    // Tunable thresholds
     const double maxLatencyMultiplier = 2.0; // 2× baseline
     const double maxErrorRate = 0.05; // 5%
 
-    if (avgLatencyMs > baselineLatencyMs * maxLatencyMultiplier) {
+    if (errorRate > maxErrorRate) {
       return true;
     }
 
-    if (errorRate > maxErrorRate) {
+    if (avgLatencyMs > baselineLatencyMs * maxLatencyMultiplier) {
       return true;
     }
 
@@ -182,6 +206,26 @@ class BenchmarkResult {
     required this.degradationPoint,
     required this.testedAt,
   });
+
+  // Create a BenchmarkResult from a JSON map
+  factory BenchmarkResult.fromJson(Map<String, dynamic> json) {
+    return BenchmarkResult(
+      maxStableConcurrency: json['max_stable_concurrency'] as int,
+      baselineLatencyMs: json['baseline_latency_ms'] as int,
+      degradationPoint: json['degradation_point'] as int?,
+      testedAt: DateTime.parse(json['tested_at'] as String),
+    );
+  }
+
+  // Convert a BenchmarkResult instance to a JSON map
+  Map<String, dynamic> toJson() {
+    return {
+      'max_stable_concurrency': maxStableConcurrency,
+      'baseline_latency_ms': baselineLatencyMs,
+      'degradation_point': degradationPoint,
+      'tested_at': testedAt.toIso8601String(),
+    };
+  }
 }
 
 /// Internal: single wave metrics

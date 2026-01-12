@@ -150,6 +150,7 @@ class _CollectionDetailViewState extends State<CollectionDetailView> {
                   return const Center(child: Text('No data found'));
                 }
                 return ListView(
+                  padding: const EdgeInsets.all(12),
                   children:
                       state.explorerTree
                           .map(
@@ -192,52 +193,59 @@ class _ExplorerNodeWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // 📁 Folder
     if (node.isFolder) {
-      return ExpansionTile(
-        tilePadding: EdgeInsets.only(left: padding),
-        leading: const Icon(Icons.folder),
-        title: Text(node.name),
-        trailing: PopupMenuButton<String>(
-          onSelected: (v) {
-            if (v == 'add_folder') {
-              showFolderSheet(
-                context: context,
-                collectionId: collectionID,
-                parentFolderId: node.id,
-              );
-            } else if (v == 'add_request') {
-              showRequestSheet(
-                context: context,
-                collectionId: collectionID,
-                folderId: node.id,
-              );
-            } else if (v == 'edit') {
-              showFolderSheet(
-                context: context,
-                collectionId: collectionID,
-                folderId: node.id,
-                initialName: node.name,
-              );
-            }
-          },
-          icon: Icon(Icons.more_vert_rounded),
-          itemBuilder:
-              (_) => const [
-                PopupMenuItem(value: 'add_folder', child: Text('Add Folder')),
-                PopupMenuItem(value: 'add_request', child: Text('Add Request')),
-                PopupMenuItem(value: 'edit', child: Text('Edit')),
-              ],
-        ),
-
-        children:
-            node.children
-                .map(
-                  (child) => _ExplorerNodeWidget(
-                    node: child,
-                    collectionID: collectionID,
-                    padding: padding + 12,
+      return ClipRRect(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        child: ExpansionTile(
+          tilePadding: EdgeInsets.only(left: padding),
+          leading: const Icon(Icons.folder),
+          backgroundColor: currentTheme.cardBackground,
+          title: Text(node.name),
+          trailing: PopupMenuButton<String>(
+            onSelected: (v) {
+              if (v == 'add_folder') {
+                showFolderSheet(
+                  context: context,
+                  collectionId: collectionID,
+                  parentFolderId: node.id,
+                );
+              } else if (v == 'add_request') {
+                showRequestSheet(
+                  context: context,
+                  collectionId: collectionID,
+                  folderId: node.id,
+                );
+              } else if (v == 'edit') {
+                showFolderSheet(
+                  context: context,
+                  collectionId: collectionID,
+                  folderId: node.id,
+                  initialName: node.name,
+                );
+              }
+            },
+            icon: Icon(Icons.more_vert_rounded),
+            itemBuilder:
+                (_) => const [
+                  PopupMenuItem(value: 'add_folder', child: Text('Add Folder')),
+                  PopupMenuItem(
+                    value: 'add_request',
+                    child: Text('Add Request'),
                   ),
-                )
-                .toList(),
+                  PopupMenuItem(value: 'edit', child: Text('Edit')),
+                ],
+          ),
+
+          children:
+              node.children
+                  .map(
+                    (child) => _ExplorerNodeWidget(
+                      node: child,
+                      collectionID: collectionID,
+                      padding: padding + 12,
+                    ),
+                  )
+                  .toList(),
+        ),
       );
     }
 

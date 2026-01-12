@@ -123,12 +123,7 @@ class Utility {
                 MyGap(gap: 8),
                 MyText.bodyLarge(
                   title ?? "Please wait!",
-                  style: TextStyle(
-                    color:
-                        AppColors()
-                            .getCurrentColorScheme(context: context)
-                            .primary,
-                  ),
+                  style: TextStyle(color: currentTheme.primary),
                 ),
               ],
             ),

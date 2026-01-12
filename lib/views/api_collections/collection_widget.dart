@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../config/components/my_text.dart';
 import '../../config/theme/color/colors.dart';
+import '../../main.dart';
 
 class CollectionTile extends StatelessWidget {
   final VoidCallback? onCollectionTap;
@@ -26,13 +27,7 @@ class CollectionTile extends StatelessWidget {
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            border: Border.all(
-              color:
-                  AppColors()
-                      .getCurrentColorScheme(context: context)
-                      .borderColor,
-              width: 2,
-            ),
+            border: Border.all(color: currentTheme.borderColor, width: 2),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Padding(
@@ -44,8 +39,7 @@ class CollectionTile extends StatelessWidget {
                   name,
                   style: TextStyle(
                     color:
-                        AppColors()
-                            .getCurrentColorScheme(context: context)
+                        currentTheme
                             .primary,
                   ),
                 ),
@@ -55,8 +49,7 @@ class CollectionTile extends StatelessWidget {
                     Icons.delete,
 
                     color:
-                        AppColors()
-                            .getCurrentColorScheme(context: context)
+                       currentTheme
                             .primary,
                     size: 20,
                   ),

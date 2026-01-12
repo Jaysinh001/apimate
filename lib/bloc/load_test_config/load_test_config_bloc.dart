@@ -3,6 +3,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../domain/model/load_test/load_test_config.dart';
+import '../../data/services/shared_preference_manager.dart';
 import '../../domain/repository/load_test/device_benchmark_service.dart';
 
 part 'load_test_config_event.dart';
@@ -13,8 +14,8 @@ class LoadTestConfigBloc
   final DeviceBenchmarkService _benchmarkService;
 
   LoadTestConfigBloc({DeviceBenchmarkService? benchmarkService})
-      : _benchmarkService = benchmarkService ?? DeviceBenchmarkService(),
-        super(const LoadTestConfigState()) {
+    : _benchmarkService = benchmarkService ?? DeviceBenchmarkService(),
+      super(const LoadTestConfigState()) {
     on<LoadDeviceBenchmark>(_handleLoadBenchmark);
     on<UpdateVUs>(_handleUpdateVUs);
     on<UpdateDuration>(_handleUpdateDuration);
@@ -24,7 +25,6 @@ class LoadTestConfigBloc
     on<UpdateSpikeAt>(_handleSpikeAt);
     on<UpdatePeakDuration>(_handlePeakDuration);
     on<RecalibrateDevice>(_handleRecalibrate);
-
   }
 
   // ============================
@@ -32,6 +32,96 @@ class LoadTestConfigBloc
   // ============================
   Future<void> _handleLoadBenchmark(
     LoadDeviceBenchmark event,
+    Emitter<LoadTestConfigState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: LoadTestConfigStatus.loading));
+
+      /// Checking the wether previous benchmark is present or not.
+      final sharedPreferencesManager = SharedPreferencesManager();
+      await sharedPreferencesManager.init();
+
+      BenchmarkResult? benchmark =
+          sharedPreferencesManager.getDeviceBenchmark();
+
+      if (benchmark == null) {
+        benchmark = await _benchmarkService.runBenchmark(
+          testUrl: 'https://httpbin.org/get',
+        );
+
+        sharedPreferencesManager.setDeviceBenchmark(benchmark);
+      }
+
+      final cappedVUs =
+          state.vus > benchmark.maxStableConcurrency
+              ? benchmark.maxStableConcurrency
+              : state.vus;
+
+      emit(
+        state.copyWith(
+          status: LoadTestConfigStatus.ready,
+          maxDeviceVUs: benchmark.maxStableConcurrency,
+          vus: cappedVUs,
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: LoadTestConfigStatus.error,
+          message: e.toString(),
+        ),
+      );
+    }
+  }
+
+  // ============================
+  // FIELD UPDATES
+  // ============================
+  void _handleUpdateVUs(UpdateVUs event, Emitter<LoadTestConfigState> emit) {
+    final value =
+        event.value > state.maxDeviceVUs ? state.maxDeviceVUs : event.value;
+
+    emit(state.copyWith(vus: value, rampEnd: value));
+  }
+
+  void _handleUpdateDuration(
+    UpdateDuration event,
+    Emitter<LoadTestConfigState> emit,
+  ) {
+    emit(state.copyWith(duration: event.value));
+  }
+
+  void _handleUpdateProfile(
+    UpdateProfile event,
+    Emitter<LoadTestConfigState> emit,
+  ) {
+    emit(state.copyWith(profile: event.profile));
+  }
+
+  void _handleRampStart(
+    UpdateRampStart event,
+    Emitter<LoadTestConfigState> emit,
+  ) {
+    emit(state.copyWith(rampStart: event.value));
+  }
+
+  void _handleRampEnd(UpdateRampEnd event, Emitter<LoadTestConfigState> emit) {
+    emit(state.copyWith(rampEnd: event.value));
+  }
+
+  void _handleSpikeAt(UpdateSpikeAt event, Emitter<LoadTestConfigState> emit) {
+    emit(state.copyWith(spikeAt: event.value));
+  }
+
+  void _handlePeakDuration(
+    UpdatePeakDuration event,
+    Emitter<LoadTestConfigState> emit,
+  ) {
+    emit(state.copyWith(peakDuration: event.value));
+  }
+
+  Future<void> _handleRecalibrate(
+    RecalibrateDevice event,
     Emitter<LoadTestConfigState> emit,
   ) async {
     try {
@@ -62,95 +152,4 @@ class LoadTestConfigBloc
       );
     }
   }
-
-  // ============================
-  // FIELD UPDATES
-  // ============================
-  void _handleUpdateVUs(
-    UpdateVUs event,
-    Emitter<LoadTestConfigState> emit,
-  ) {
-    final value =
-        event.value > state.maxDeviceVUs
-            ? state.maxDeviceVUs
-            : event.value;
-
-    emit(state.copyWith(vus: value));
-  }
-
-  void _handleUpdateDuration(
-    UpdateDuration event,
-    Emitter<LoadTestConfigState> emit,
-  ) {
-    emit(state.copyWith(duration: event.value));
-  }
-
-  void _handleUpdateProfile(
-    UpdateProfile event,
-    Emitter<LoadTestConfigState> emit,
-  ) {
-    emit(state.copyWith(profile: event.profile));
-  }
-
-  void _handleRampStart(
-    UpdateRampStart event,
-    Emitter<LoadTestConfigState> emit,
-  ) {
-    emit(state.copyWith(rampStart: event.value));
-  }
-
-  void _handleRampEnd(
-    UpdateRampEnd event,
-    Emitter<LoadTestConfigState> emit,
-  ) {
-    emit(state.copyWith(rampEnd: event.value));
-  }
-
-  void _handleSpikeAt(
-    UpdateSpikeAt event,
-    Emitter<LoadTestConfigState> emit,
-  ) {
-    emit(state.copyWith(spikeAt: event.value));
-  }
-
-  void _handlePeakDuration(
-    UpdatePeakDuration event,
-    Emitter<LoadTestConfigState> emit,
-  ) {
-    emit(state.copyWith(peakDuration: event.value));
-  }
-
-  Future<void> _handleRecalibrate(
-  RecalibrateDevice event,
-  Emitter<LoadTestConfigState> emit,
-) async {
-  try {
-    emit(state.copyWith(status: LoadTestConfigStatus.loading));
-
-    final result = await _benchmarkService.runBenchmark(
-      testUrl: 'https://httpbin.org/get',
-    );
-
-    final cappedVUs =
-        state.vus > result.maxStableConcurrency
-            ? result.maxStableConcurrency
-            : state.vus;
-
-    emit(
-      state.copyWith(
-        status: LoadTestConfigStatus.ready,
-        maxDeviceVUs: result.maxStableConcurrency,
-        vus: cappedVUs,
-      ),
-    );
-  } catch (e) {
-    emit(
-      state.copyWith(
-        status: LoadTestConfigStatus.error,
-        message: e.toString(),
-      ),
-    );
-  }
-}
-
 }
