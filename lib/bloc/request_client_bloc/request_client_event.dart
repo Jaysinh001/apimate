@@ -58,6 +58,66 @@ class RemoveHeader extends RequestClientEvent {
   List<Object?> get props => [key];
 }
 
+
+class UpdateAuthType extends RequestClientEvent {
+  final AuthType type;
+  const UpdateAuthType(this.type);
+
+     @override
+  List<Object?> get props => [type];
+}
+
+class UpdateBearerToken extends RequestClientEvent {
+  final String token;
+  const UpdateBearerToken(this.token);
+
+     @override
+  List<Object?> get props => [token];
+}
+
+class UpdateApiKey extends RequestClientEvent {
+  final String key;
+  const UpdateApiKey({required this.key});
+
+     @override
+  List<Object?> get props => [key];
+}
+
+class UpdateApiValue extends RequestClientEvent {
+  final String value;
+  const UpdateApiValue({required this.value});
+
+
+     @override
+  List<Object?> get props => [value];
+}
+
+class UpdateApiLocation extends RequestClientEvent {
+  final ApiKeyLocation location;
+  const UpdateApiLocation(this.location);
+
+     @override
+  List<Object?> get props => [location];
+}
+
+class UpdateBasicUsername extends RequestClientEvent {
+  final String username;
+  const UpdateBasicUsername(this.username);
+
+   @override
+  List<Object?> get props => [username];
+}
+
+class UpdateBasicPassword extends RequestClientEvent {
+  final String password;
+  const UpdateBasicPassword(this.password);
+
+   @override
+  List<Object?> get props => [password];
+}
+
+
+
 class AddQueryParam extends RequestClientEvent {
   final String key;
   final String value;

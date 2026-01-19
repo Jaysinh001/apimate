@@ -1,3 +1,5 @@
+import 'request_auth_model.dart';
+
 class RequestClientData {
   final int requestId;
   final String method;
@@ -7,6 +9,8 @@ class RequestClientData {
   final Map<String, String> queryParams;
 
   final RequestBodyData? body;
+
+  final RequestAuth auth;
 
   // 🔑 NEW: collection variables
   final Map<String, String?> collectionVariables;
@@ -18,14 +22,12 @@ class RequestClientData {
     required this.rawUrl,
     required this.headers,
     required this.queryParams,
+    required this.auth,
     required this.collectionVariables,
     required this.inactiveCollectionVariables,
     this.body,
   });
 }
-
-
-
 
 enum RequestBodyType { none, raw }
 

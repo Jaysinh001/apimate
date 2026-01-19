@@ -1,13 +1,12 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../config/utility/utility.dart';
+import '../../domain/model/request_client_model/request_auth_model.dart';
 import '../../domain/model/request_client_model/request_client_data_model.dart';
 import '../../domain/model/request_client_model/request_draft_model.dart';
-import '../../domain/model/request_client_model/request_execution_input.dart';
 import '../../domain/model/request_client_model/request_response_model.dart';
 import '../../domain/model/variable_resolution_engine_model/variable_resolution_engine_model.dart';
 
@@ -39,6 +38,14 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
     on<UpdateHeader>(_handleUpdateHeader);
     on<RemoveHeader>(_handleRemoveHeader);
 
+    on<UpdateAuthType>(_handleUpdateAuthType);
+    on<UpdateBearerToken>(_handleUpdateBearerToken);
+    on<UpdateApiKey>(_handleUpdateApiKey);
+    on<UpdateApiValue>(_handleUpdateApiValue);
+    on<UpdateApiLocation>(_handleUpdateApiLocation);
+    on<UpdateBasicUsername>(_handleUpdateBasicUsername);
+    on<UpdateBasicPassword>(_handleUpdateBasicPassword);
+
     on<AddQueryParam>(_handleAddQueryParam);
     on<UpdateQueryParam>(_handleUpdateQueryParam);
     on<RemoveQueryParam>(_handleRemoveQueryParam);
@@ -69,6 +76,7 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
         headers: _requestData!.headers,
         queryParams: _requestData!.queryParams,
         body: _requestData!.body?.content,
+        auth: _requestData!.auth,
         contentType: _requestData!.body?.contentType,
       );
 
@@ -139,14 +147,30 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
         return;
       }
 
-      final input = RequestExecutionInput(
-        method: state.draft!.method,
-        url: resolution.resolvedValue,
-        headers: state.draft!.headers,
-        queryParams: state.draft!.queryParams,
-        body: state.draft!.body,
-        contentType: state.draft!.contentType,
+      final reqData = RequestClientData(
+        requestId: _requestData!.requestId,
+        method: _requestData!.method,
+        rawUrl: resolution.resolvedValue,
+        headers: _requestData!.headers,
+        queryParams: _requestData!.queryParams,
+        auth: _requestData!.auth,
+        collectionVariables: _requestData!.collectionVariables,
+        inactiveCollectionVariables: _requestData!.inactiveCollectionVariables,
+        body: _requestData?.body
       );
+      Utility.showLog("before buildExecutionInput Body: ${reqData.body}");
+
+      final input = await _repo.buildExecutionInput(reqData);
+
+      Utility.showLog(
+        "RequestData auth username: ${reqData.auth.username}",
+      );
+      Utility.showLog(
+        "RequestData auth password: ${reqData.auth.password}",
+      );
+
+      Utility.showLog("RequestExecutionInput headers: ${input.headers}");
+      Utility.showLog("RequestExecutionInput Body: ${input.body}");
 
       final response = await _executor.execute(
         requestId: _requestData!.requestId,
@@ -236,6 +260,94 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
       ..remove(event.key);
 
     _updateDraft(emit, state.draft!.copyWith(headers: headers));
+  }
+
+  // ============================================================
+  // AUTHORIZATION EDIT EVENTS
+  // ============================================================
+
+  void _handleUpdateAuthType(
+    UpdateAuthType event,
+    Emitter<RequestClientState> emit,
+  ) {
+    final draft = state.draft;
+    if (draft == null) return;
+
+    final updatedAuth = RequestAuth(type: event.type, isActive: true);
+
+    _updateDraft(emit, draft.copyWith(auth: updatedAuth));
+  }
+
+  void _handleUpdateBearerToken(
+    UpdateBearerToken event,
+    Emitter<RequestClientState> emit,
+  ) {
+    final draft = state.draft;
+    if (draft == null) return;
+
+    final auth = draft.auth.copyWith(token: event.token);
+
+    _updateDraft(emit, draft.copyWith(auth: auth));
+  }
+
+  void _handleUpdateApiKey(
+    UpdateApiKey event,
+    Emitter<RequestClientState> emit,
+  ) {
+    final draft = state.draft;
+    if (draft == null) return;
+
+    final auth = draft.auth.copyWith(apiKey: event.key);
+
+    _updateDraft(emit, draft.copyWith(auth: auth));
+  }
+
+  void _handleUpdateApiValue(
+    UpdateApiValue event,
+    Emitter<RequestClientState> emit,
+  ) {
+    final draft = state.draft;
+    if (draft == null) return;
+
+    final auth = draft.auth.copyWith(apiValue: event.value);
+
+    _updateDraft(emit, draft.copyWith(auth: auth));
+  }
+
+  void _handleUpdateApiLocation(
+    UpdateApiLocation event,
+    Emitter<RequestClientState> emit,
+  ) {
+    final draft = state.draft;
+    if (draft == null) return;
+
+    final auth = draft.auth.copyWith(apiLocation: event.location);
+
+    _updateDraft(emit, draft.copyWith(auth: auth));
+  }
+
+  void _handleUpdateBasicUsername(
+    UpdateBasicUsername event,
+    Emitter<RequestClientState> emit,
+  ) {
+    final draft = state.draft;
+    if (draft == null) return;
+
+    final auth = draft.auth.copyWith(username: event.username);
+
+    _updateDraft(emit, draft.copyWith(auth: auth));
+  }
+
+  void _handleUpdateBasicPassword(
+    UpdateBasicPassword event,
+    Emitter<RequestClientState> emit,
+  ) {
+    final draft = state.draft;
+    if (draft == null) return;
+
+    final auth = draft.auth.copyWith(password: event.password);
+
+    _updateDraft(emit, draft.copyWith(auth: auth));
   }
 
   // ============================================================
@@ -348,6 +460,7 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
           status: RequestClientStatus.ready,
           savedDraft: state.draft, // ✅ reset baseline
           hasUnsavedChanges: false,
+
           message: 'Changes saved',
         ),
       );

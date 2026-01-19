@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import '../../../data/services/database_service.dart';
+import '../../model/request_client_model/request_auth_model.dart';
 import '../../model/request_client_model/request_client_data_model.dart';
 import '../../model/request_client_model/request_draft_model.dart';
+import '../../model/request_client_model/request_execution_input.dart';
 
 class RequestClientRepo {
   final DatabaseService _dbService = DatabaseService.instance;
@@ -101,17 +105,110 @@ class RequestClientRepo {
     }
 
     // ======================
-    // 6️⃣ Build aggregate object
+    // 6️⃣ Load request auth
+    // ======================
+    final authRows = await db.query(
+      'request_auth',
+      where: 'request_id = ? AND is_active = 1',
+      whereArgs: [requestId],
+      limit: 1,
+    );
+
+    RequestAuth auth = RequestAuth.none();
+
+    if (authRows.isNotEmpty) {
+      final row = authRows.first;
+
+      final type = row['type'] as String;
+
+      auth = RequestAuth(
+        type: _mapAuthType(type),
+        token: row['token'] as String?,
+        apiKey: row['api_key'] as String?,
+        apiValue: row['api_value'] as String?,
+        apiLocation: _mapApiLocation(row['api_location'] as String?),
+        username: row['username'] as String?,
+        password: row['password'] as String?,
+        isActive: (row['is_active'] as int) == 1,
+      );
+    }
+
+    // ======================
+    // Build aggregate object
     // ======================
     return RequestClientData(
       requestId: requestId,
       method: request['method'] as String,
       rawUrl: request['url'] as String,
       headers: headers,
+      auth: auth,
       queryParams: queryParams,
       body: body,
       collectionVariables: variables,
       inactiveCollectionVariables: inactiveKeys,
+    );
+  }
+
+  Future<RequestExecutionInput> buildExecutionInput(
+    RequestClientData data,
+  ) async {
+    RequestExecutionInput input = RequestExecutionInput(
+      method: data.method,
+      url: data.rawUrl,
+      headers: Map.from(data.headers),
+      queryParams: Map.from(data.queryParams),
+      body: data.body?.content,
+      contentType: data.body?.contentType,
+    );
+
+    // 🔥 APPLY AUTH HERE
+    input = _applyAuth(input, data.auth);
+
+    return input;
+
+    // return _applyAuth(input, data.auth);
+  }
+
+  RequestExecutionInput _applyAuth(
+    RequestExecutionInput input,
+    RequestAuth auth,
+  ) {
+    if (!auth.isActive) return input;
+
+    final headers = Map<String, String>.from(input.headers);
+    final query = Map<String, String>.from(input.queryParams);
+
+    switch (auth.type) {
+      case AuthType.bearer:
+        headers['Authorization'] = 'Bearer ${auth.token}';
+        break;
+
+      case AuthType.apiKey:
+        if (auth.apiLocation == ApiKeyLocation.header) {
+          headers[auth.apiKey!] = auth.apiValue!;
+        } else {
+          query[auth.apiKey!] = auth.apiValue!;
+        }
+        break;
+
+      case AuthType.basic:
+        final encoded = base64Encode(
+          utf8.encode('${auth.username}:${auth.password}'),
+        );
+        headers['Authorization'] = 'Basic $encoded';
+        break;
+
+      default:
+        break;
+    }
+
+    return RequestExecutionInput(
+      method: input.method,
+      url: input.url,
+      headers: headers,
+      queryParams: query,
+      body: input.body,
+      contentType: input.contentType,
     );
   }
 
@@ -198,6 +295,51 @@ class RequestClientRepo {
           'updated_at': now,
         });
       }
+
+      // =========================
+      // 5️⃣ Save request auth
+      // =========================
+      await txn.delete(
+        'request_auth',
+        where: 'request_id = ?',
+        whereArgs: [requestId],
+      );
+
+      if (draft.auth.isActive) {
+        await txn.insert('request_auth', {
+          'request_id': requestId,
+          'type': draft.auth.type.name,
+          'token': draft.auth.token,
+          'api_key': draft.auth.apiKey,
+          'api_value': draft.auth.apiValue,
+          'api_location': draft.auth.apiLocation?.name,
+          'username': draft.auth.username,
+          'password': draft.auth.password,
+          'is_active': 1,
+          'created_at': now,
+          'updated_at': now,
+        });
+      }
     });
+  }
+
+  AuthType _mapAuthType(String value) {
+    switch (value) {
+      case 'bearer':
+        return AuthType.bearer;
+      case 'apikey':
+        return AuthType.apiKey;
+      case 'basic':
+        return AuthType.basic;
+      case 'oauth2':
+        return AuthType.oauth2;
+      default:
+        return AuthType.none;
+    }
+  }
+
+  ApiKeyLocation? _mapApiLocation(String? value) {
+    if (value == null) return null;
+    return value == 'query' ? ApiKeyLocation.query : ApiKeyLocation.header;
   }
 }

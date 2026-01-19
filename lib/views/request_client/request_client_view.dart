@@ -1,3 +1,4 @@
+import 'package:apimate/views/request_client/tabs/auth_tab_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,7 +25,7 @@ class _RequestClientViewState extends State<RequestClientView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
 
     bloc =
         RequestClientBloc()
@@ -35,104 +36,112 @@ class _RequestClientViewState extends State<RequestClientView>
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => bloc,
-      child: Scaffold(
-        appBar: AppBar(
-          title: BlocBuilder<RequestClientBloc, RequestClientState>(
-            buildWhen: (p, c) => p.hasUnsavedChanges != c.hasUnsavedChanges,
-            builder: (context, state) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Request'),
-                  if (state.hasUnsavedChanges)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 6),
-                      child: Icon(
-                        Icons.circle,
-                        size: 8,
-                        color: currentTheme.warning,
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-          actions: [
-            Text("Save"),
-
-            BlocBuilder<RequestClientBloc, RequestClientState>(
+      child: BlocListener<RequestClientBloc, RequestClientState>(
+        listener: (context, state) {
+          if (state.status == RequestClientStatus.sending) {
+            _tabController.animateTo(_tabController.length -1 );
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: BlocBuilder<RequestClientBloc, RequestClientState>(
+              buildWhen: (p, c) => p.hasUnsavedChanges != c.hasUnsavedChanges,
               builder: (context, state) {
-                return IconButton(
-                  icon: const Icon(Icons.save),
-                  onPressed:
-                      state.hasUnsavedChanges
-                          ? () => context.read<RequestClientBloc>().add(
-                            const SaveRequestDraft(),
-                          )
-                          : null,
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Request'),
+                    if (state.hasUnsavedChanges)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 6),
+                        child: Icon(
+                          Icons.circle,
+                          size: 8,
+                          color: currentTheme.warning,
+                        ),
+                      ),
+                  ],
                 );
               },
             ),
-          ],
-        ),
-        body: BlocBuilder<RequestClientBloc, RequestClientState>(
-          builder: (context, state) {
-            if (state.status == RequestClientStatus.loading) {
-              return const Center(child: CircularProgressIndicator());
-            }
+            actions: [
+              Text("Save"),
 
-            if (state.draft == null) {
-              return const Center(child: Text('Failed to load request'));
-            }
+              BlocBuilder<RequestClientBloc, RequestClientState>(
+                builder: (context, state) {
+                  return IconButton(
+                    icon: const Icon(Icons.save),
+                    onPressed:
+                        state.hasUnsavedChanges
+                            ? () => context.read<RequestClientBloc>().add(
+                              const SaveRequestDraft(),
+                            )
+                            : null,
+                  );
+                },
+              ),
+            ],
+          ),
+          body: BlocBuilder<RequestClientBloc, RequestClientState>(
+            builder: (context, state) {
+              if (state.status == RequestClientStatus.loading) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-            return PopScope(
-              canPop: !state.hasUnsavedChanges,
-              onPopInvokedWithResult: (didPop, result) async {
-                if (didPop) return;
+              if (state.draft == null) {
+                return const Center(child: Text('Failed to load request'));
+              }
 
-                final shouldDiscard = await showDialog<bool>(
-                  context: context,
-                  builder:
-                      (context) => AlertDialog(
-                        title: const Text('Unsaved changes'),
-                        content: const Text(
-                          'You have unsaved changes. Discard them and go back?',
+              return PopScope(
+                canPop: !state.hasUnsavedChanges,
+                onPopInvokedWithResult: (didPop, result) async {
+                  if (didPop) return;
+
+                  final shouldDiscard = await showDialog<bool>(
+                    context: context,
+                    builder:
+                        (context) => AlertDialog(
+                          title: const Text('Unsaved changes'),
+                          content: const Text(
+                            'You have unsaved changes. Discard them and go back?',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Discard'),
+                            ),
+                          ],
                         ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: const Text('Discard'),
-                          ),
+                  );
+
+                  if (shouldDiscard == true) {
+                    Navigator.of(context).pop(result);
+                  }
+                },
+                child: Column(
+                  children: [
+                    RequestActionBar(controller: _tabController),
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: const [
+                          ParamsTab(),
+                          AuthTab(),
+                          HeadersTab(),
+                          BodyTab(),
+                          ResponseTab(),
                         ],
                       ),
-                );
-
-                if (shouldDiscard == true) {
-                  Navigator.of(context).pop(result);
-                }
-              },
-              child: Column(
-                children: [
-                  RequestActionBar(controller: _tabController),
-                  Expanded(
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: const [
-                        ParamsTab(),
-                        HeadersTab(),
-                        BodyTab(),
-                        ResponseTab(),
-                      ],
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
