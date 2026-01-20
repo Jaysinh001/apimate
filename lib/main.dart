@@ -16,6 +16,7 @@ import 'config/theme/color/colors.dart';
 
 DatabaseService? databaseService;
 late AppColorScheme currentTheme;
+GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() {
   WidgetsFlutterBinding.ensureInitialized;
   databaseService = DatabaseService.instance;
@@ -45,23 +46,24 @@ class MyApp extends StatelessWidget {
             maintainBottomViewPadding: true,
             top: false,
             child: MaterialApp(
+              navigatorKey: navigatorKey,
               builder: (context, child) {
                 /// Global variable to access current theme
-                currentTheme = AppColors.getCurrentColorScheme(context: context);
-            
+                currentTheme = AppColors.getCurrentColorScheme(
+                  context: context,
+                );
+
                 final mediaQueryData = MediaQuery.of(context);
-            
+
                 // Calculate the scaled text factor using the clamp function to ensure it stays within a specified range.
                 final scale = mediaQueryData.textScaler.clamp(
                   minScaleFactor: 1.0, // Minimum scale factor allowed.
                   maxScaleFactor: 1.2, // Maximum scale factor allowed.
                 );
-            
-                return UpgradeAlert(
-                  child: MediaQuery(
-                    data: mediaQueryData.copyWith(textScaler: scale),
-                    child: child!,
-                  ),
+
+                return MediaQuery(
+                  data: mediaQueryData.copyWith(textScaler: scale),
+                  child: child!,
                 );
               },
               title: 'Apimate',

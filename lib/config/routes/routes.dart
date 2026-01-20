@@ -6,8 +6,10 @@ import 'package:apimate/views/load_test/load_test_live_view.dart';
 import 'package:apimate/views/load_test/select_apis_view.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:upgrader/upgrader.dart';
 
 import '../../domain/model/collection_detail_model/collection_explorer_node.dart';
+import '../../main.dart';
 import '../../views/request_client/request_client_view.dart';
 import '../../views/views.dart';
 import 'routes_name.dart';
@@ -20,7 +22,13 @@ class Routes {
      
       case RoutesName.apiCollections:
         return MaterialPageRoute(
-          builder: (context) => const ApiCollectionsScreen(),
+          builder: (context) => UpgradeAlert(
+                  navigatorKey: navigatorKey,
+                  barrierDismissible: false,
+                  upgrader: Upgrader(
+                   debugDisplayAlways: true,
+                   durationUntilAlertAgain: Duration(hours: 1),
+                  ),child: const ApiCollectionsScreen()),
         );
       case RoutesName.importCollectionView:
         return MaterialPageRoute(
