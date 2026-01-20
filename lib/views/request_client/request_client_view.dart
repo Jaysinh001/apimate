@@ -39,7 +39,7 @@ class _RequestClientViewState extends State<RequestClientView>
       child: BlocListener<RequestClientBloc, RequestClientState>(
         listener: (context, state) {
           if (state.status == RequestClientStatus.sending) {
-            _tabController.animateTo(_tabController.length -1 );
+            _tabController.animateTo(_tabController.length - 1);
           }
         },
         child: Scaffold(
