@@ -81,6 +81,24 @@ class DatabaseService {
   FOREIGN KEY (request_id) REFERENCES requests(id) ON DELETE CASCADE
 );
 ''';
+
+    String requestAuth = '''CREATE TABLE request_auth (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  request_id INTEGER NOT NULL,
+  type TEXT NOT NULL,               -- none | bearer | apikey | basic | oauth2
+  token TEXT,                       -- bearer
+  api_key TEXT,                     -- api key
+  api_value TEXT,
+  api_location TEXT,                -- header | query
+  username TEXT,                    -- basic auth
+  password TEXT,
+  is_active INTEGER DEFAULT 1,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  FOREIGN KEY (request_id) REFERENCES requests(id) ON DELETE CASCADE
+);
+''';
+
     String queryParams = '''CREATE TABLE query_params (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   remote_id TEXT,
@@ -192,6 +210,7 @@ CREATE TABLE collection_variables (
         await db.execute(folder);
         await db.execute(request);
         await db.execute(headers);
+        await db.execute(requestAuth);
         await db.execute(queryParams);
         await db.execute(requestBodies);
         await db.execute(responses);

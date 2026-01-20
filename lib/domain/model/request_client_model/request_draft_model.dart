@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'request_auth_model.dart';
+
 class RequestDraft extends Equatable {
   final String method;
   final String rawUrl;
@@ -7,12 +9,14 @@ class RequestDraft extends Equatable {
   /// Editable components
   final Map<String, String> headers;
   final Map<String, String> queryParams;
+  final RequestAuth auth;
   final String? body;
   final String? contentType;
 
   const RequestDraft({
     required this.method,
     required this.rawUrl,
+    required this.auth,
     required this.headers,
     required this.queryParams,
     this.body,
@@ -25,12 +29,14 @@ class RequestDraft extends Equatable {
     required String rawUrl,
     required Map<String, String> headers,
     required Map<String, String> queryParams,
+    required RequestAuth auth,
     String? body,
     String? contentType,
   }) {
     return RequestDraft(
       method: method,
       rawUrl: rawUrl,
+      auth: auth,
       headers: Map<String, String>.from(headers),
       queryParams: Map<String, String>.from(queryParams),
       body: body,
@@ -43,6 +49,7 @@ class RequestDraft extends Equatable {
     Map<String, String>? headers,
     Map<String, String>? queryParams,
     String? body,
+    RequestAuth? auth,
     String? rawUrl,
     String? contentType,
   }) {
@@ -50,6 +57,7 @@ class RequestDraft extends Equatable {
       method: method,
       rawUrl: rawUrl ?? this.rawUrl,
       headers: headers ?? this.headers,
+      auth: auth ?? this.auth,
       queryParams: queryParams ?? this.queryParams,
       body: body ?? this.body,
       contentType: contentType ?? this.contentType,
@@ -58,11 +66,12 @@ class RequestDraft extends Equatable {
 
   @override
   List<Object?> get props => [
-        method,
-        rawUrl,
-        headers,
-        queryParams,
-        body,
-        contentType,
-      ];
+    method,
+    rawUrl,
+    headers,
+    auth,
+    queryParams,
+    body,
+    contentType,
+  ];
 }

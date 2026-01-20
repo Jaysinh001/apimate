@@ -11,10 +11,11 @@ import 'config/routes/routes_name.dart';
 import 'config/theme/app_theme/app_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'config/theme/color/app_color_scheme.dart';
 import 'config/theme/color/colors.dart';
 
 DatabaseService? databaseService;
-dynamic currentTheme;
+late AppColorScheme currentTheme;
 void main() {
   WidgetsFlutterBinding.ensureInitialized;
   databaseService = DatabaseService.instance;

@@ -12,6 +12,7 @@ class RequestTabs extends StatelessWidget {
       dividerHeight: 0,
       tabs: [
         Tab(text: 'Params'),
+        Tab(text: 'Authorization'),
         Tab(text: 'Headers'),
         Tab(text: 'Body'),
         Tab(text: 'Response'),

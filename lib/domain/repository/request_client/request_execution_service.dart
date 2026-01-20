@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 
+import '../../../config/utility/utility.dart';
 import '../../model/request_client_model/request_execution_input.dart';
 import '../../model/request_client_model/request_response_model.dart';
 
@@ -30,6 +31,11 @@ class RequestExecutionService {
     final stopwatch = Stopwatch()..start();
 
     try {
+      Utility.showLog("Headers : ${input.headers}");
+
+      Utility.showLog("url : ${input.url}");
+      Utility.showLog("payload : ${input.body}");
+
       final response = await _dio.request(
         input.url,
         data: input.body,
@@ -48,6 +54,10 @@ class RequestExecutionService {
 
       stopwatch.stop();
 
+      Utility.showLog(
+        "Response : ${response.statusCode}  :  ${response.statusCode}",
+      );
+
       return RequestResponse(
         id: 0,
         requestId: requestId,
@@ -60,6 +70,8 @@ class RequestExecutionService {
       );
     } on DioException catch (e) {
       stopwatch.stop();
+
+      Utility.showLog("DioException : $e");
 
       return RequestResponse(
         id: 0,
@@ -75,6 +87,8 @@ class RequestExecutionService {
       );
     } catch (e) {
       stopwatch.stop();
+
+      Utility.showLog("Unknown Exception : $e");
 
       return RequestResponse(
         id: 0,
