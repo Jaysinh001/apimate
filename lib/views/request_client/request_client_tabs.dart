@@ -8,6 +8,8 @@ class RequestTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     return TabBar(
       controller: controller,
+      isScrollable: true,
+      tabAlignment: TabAlignment.start,
       // padding: EdgeInsets.only(bottom: 0),
       dividerHeight: 0,
       tabs: [
