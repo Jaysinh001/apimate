@@ -19,16 +19,19 @@ class Routes {
     switch (settings.name) {
       case RoutesName.splashView:
         return MaterialPageRoute(builder: (context) => const SplashView());
-     
+
       case RoutesName.apiCollections:
         return MaterialPageRoute(
-          builder: (context) => UpgradeAlert(
-                  navigatorKey: navigatorKey,
-                  barrierDismissible: false,
-                  upgrader: Upgrader(
-                   debugDisplayAlways: true,
-                   durationUntilAlertAgain: Duration(hours: 1),
-                  ),child: const ApiCollectionsScreen()),
+          builder:
+              (context) => UpgradeAlert(
+                navigatorKey: navigatorKey,
+                barrierDismissible: false,
+                upgrader: Upgrader(
+                  debugDisplayAlways: true,
+                  durationUntilAlertAgain: Duration(hours: 1),
+                ),
+                child: const ApiCollectionsScreen(),
+              ),
         );
       case RoutesName.importCollectionView:
         return MaterialPageRoute(

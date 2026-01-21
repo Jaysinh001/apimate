@@ -134,40 +134,52 @@ class RequestClientBloc extends Bloc<RequestClientEvent, RequestClientState> {
     emit(state.copyWith(status: RequestClientStatus.sending));
 
     try {
-      final resolution = _resolveUrl(state.draft!);
+      // final resolution = _resolveUrl(state.draft!);
 
-      if (resolution.hasErrors) {
-        emit(
-          state.copyWith(
-            status: RequestClientStatus.error,
-            message: 'Variable resolution failed',
-            variableWarnings: resolution.warnings,
-          ),
-        );
-        return;
-      }
+      // if (resolution.hasErrors) {
+      //   emit(
+      //     state.copyWith(
+      //       status: RequestClientStatus.error,
+      //       message: 'Variable resolution failed',
+      //       variableWarnings: resolution.warnings,
+      //     ),
+      //   );
+      //   return;
+      // }
+
+      // final reqData = RequestClientData(
+      //   requestId: _requestData!.requestId,
+      //   method: _requestData!.method,
+      //   rawUrl: state.resolvedUrl ?? '',
+      //   headers: _requestData!.headers,
+      //   queryParams: _requestData!.queryParams,
+      //   auth: _requestData!.auth,
+      //   collectionVariables: _requestData!.collectionVariables,
+      //   inactiveCollectionVariables: _requestData!.inactiveCollectionVariables,
+      //   body: _requestData?.body,
+      // );
 
       final reqData = RequestClientData(
-        requestId: _requestData!.requestId,
-        method: _requestData!.method,
-        rawUrl: resolution.resolvedValue,
-        headers: _requestData!.headers,
-        queryParams: _requestData!.queryParams,
-        auth: _requestData!.auth,
+        requestId: state.requestId ?? 0,
+        method: state.draft!.method,
+        rawUrl: state.resolvedUrl ?? '',
+        headers: state.draft?.headers ?? {},
+        queryParams: state.draft?.queryParams ?? {},
+        auth: state.draft?.auth ?? RequestAuth.none(),
         collectionVariables: _requestData!.collectionVariables,
         inactiveCollectionVariables: _requestData!.inactiveCollectionVariables,
-        body: _requestData?.body
+        body: RequestBodyData(
+          type: RequestBodyType.none,
+          content: state.draft?.body ?? '',
+          contentType: state.draft?.contentType,
+        ),
       );
       Utility.showLog("before buildExecutionInput Body: ${reqData.body}");
 
       final input = await _repo.buildExecutionInput(reqData);
 
-      Utility.showLog(
-        "RequestData auth username: ${reqData.auth.username}",
-      );
-      Utility.showLog(
-        "RequestData auth password: ${reqData.auth.password}",
-      );
+      Utility.showLog("RequestData auth username: ${reqData.auth.username}");
+      Utility.showLog("RequestData auth password: ${reqData.auth.password}");
 
       Utility.showLog("RequestExecutionInput headers: ${input.headers}");
       Utility.showLog("RequestExecutionInput Body: ${input.body}");

@@ -3,6 +3,7 @@ import 'package:apimate/bloc/load_test/load_test_bloc.dart';
 import 'package:apimate/config/utility/utility.dart';
 import 'package:apimate/data/services/database_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:upgrader/upgrader.dart';
 
 import 'bloc/theme_bloc/theme_bloc.dart';
@@ -53,6 +54,12 @@ class MyApp extends StatelessWidget {
                   context: context,
                 );
 
+                SystemChrome.setSystemUIOverlayStyle(
+                  SystemUiOverlayStyle(
+                    systemNavigationBarColor: currentTheme.background,
+                    systemNavigationBarDividerColor: currentTheme.surface,
+                  ),
+                );
                 final mediaQueryData = MediaQuery.of(context);
 
                 // Calculate the scaled text factor using the clamp function to ensure it stays within a specified range.
