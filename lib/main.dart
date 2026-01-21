@@ -41,31 +41,35 @@ class MyApp extends StatelessWidget {
       child: BlocBuilder<ThemeBloc, ThemeState>(
         buildWhen: (previous, current) => current.theme != previous.theme,
         builder: (context, state) {
-          return MaterialApp(
-            builder: (context, child) {
-              /// Global variable to access current theme
-              currentTheme = AppColors.getCurrentColorScheme(context: context);
-
-              final mediaQueryData = MediaQuery.of(context);
-
-              // Calculate the scaled text factor using the clamp function to ensure it stays within a specified range.
-              final scale = mediaQueryData.textScaler.clamp(
-                minScaleFactor: 1.0, // Minimum scale factor allowed.
-                maxScaleFactor: 1.2, // Maximum scale factor allowed.
-              );
-
-              return UpgradeAlert(
-                child: MediaQuery(
-                  data: mediaQueryData.copyWith(textScaler: scale),
-                  child: child!,
-                ),
-              );
-            },
-            title: 'Apimate',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme().getTheme(theme: state.theme),
-            initialRoute: RoutesName.splashView,
-            onGenerateRoute: Routes.generateRoute,
+          return SafeArea(
+            maintainBottomViewPadding: true,
+            top: false,
+            child: MaterialApp(
+              builder: (context, child) {
+                /// Global variable to access current theme
+                currentTheme = AppColors.getCurrentColorScheme(context: context);
+            
+                final mediaQueryData = MediaQuery.of(context);
+            
+                // Calculate the scaled text factor using the clamp function to ensure it stays within a specified range.
+                final scale = mediaQueryData.textScaler.clamp(
+                  minScaleFactor: 1.0, // Minimum scale factor allowed.
+                  maxScaleFactor: 1.2, // Maximum scale factor allowed.
+                );
+            
+                return UpgradeAlert(
+                  child: MediaQuery(
+                    data: mediaQueryData.copyWith(textScaler: scale),
+                    child: child!,
+                  ),
+                );
+              },
+              title: 'Apimate',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme().getTheme(theme: state.theme),
+              initialRoute: RoutesName.splashView,
+              onGenerateRoute: Routes.generateRoute,
+            ),
           );
         },
       ),
