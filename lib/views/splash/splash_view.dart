@@ -1,5 +1,4 @@
 import 'package:apimate/bloc/theme_bloc/theme_bloc.dart';
-import 'package:apimate/config/components/my_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

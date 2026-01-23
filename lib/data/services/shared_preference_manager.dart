@@ -45,7 +45,7 @@ class SharedPreferencesManager {
       return ThemeNames.dracula;
     }
     final String? themeValue = _prefs?.getString("appTheme");
-    return ThemeNamesExtension.fromValue(themeValue) ?? ThemeNames.dracula;
+    return ThemeNamesExtension.fromValue(themeValue) ?? ThemeNames.solarized;
   }
 
   //Specific method for Device Benchmark (RECOMMENDED)

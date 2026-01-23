@@ -32,29 +32,51 @@ class RequestActionBar extends StatelessWidget {
   }
 }
 
-class _ResolvedUrlEditableField extends StatelessWidget {
+class _ResolvedUrlEditableField extends StatefulWidget {
+  @override
+  State<_ResolvedUrlEditableField> createState() =>
+      _ResolvedUrlEditableFieldState();
+}
+
+class _ResolvedUrlEditableFieldState extends State<_ResolvedUrlEditableField> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize once with the current state
+    final initialState = context.read<RequestClientBloc>().state;
+    _controller = TextEditingController(text: initialState.draft?.rawUrl ?? '');
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose(); // Always clean up controllers!
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<RequestClientBloc, RequestClientState>(
-      buildWhen: (p, c) => p.draft?.rawUrl != c.draft?.rawUrl,
-      builder: (context, state) {
-        final controller = TextEditingController(
-          text: state.draft?.rawUrl ?? '',
-        );
-
-        return TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Resolved URL',
-            border: OutlineInputBorder(),
-          ),
-          onChanged: (value) {
-            context.read<RequestClientBloc>().add(
-              UpdateResolvedUrl(value), // 🔑 new event
-            );
-          },
-        );
+    return BlocListener<RequestClientBloc, RequestClientState>(
+      // Update the text only if it changes externally (e.g., loading a saved request)
+      // This prevents the cursor from jumping while typing.
+      listenWhen:
+          (p, c) =>
+              p.draft?.rawUrl != c.draft?.rawUrl &&
+              c.draft?.rawUrl != _controller.text,
+      listener: (context, state) {
+        _controller.text = state.draft?.rawUrl ?? '';
       },
+      child: TextField(
+        controller: _controller,
+        decoration: const InputDecoration(
+          labelText: 'Resolved URL',
+          border: OutlineInputBorder(),
+        ),
+        onChanged: (value) {
+          context.read<RequestClientBloc>().add(UpdateResolvedUrl(value));
+        },
+      ),
     );
   }
 }

@@ -8,9 +8,7 @@ import 'package:flutter/material.dart';
 
 import 'dart:convert';
 
-import '../theme/color/colors.dart';
-
-// import '../theme/color/colors.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class Utility {
   // Add these static variables
@@ -37,6 +35,11 @@ class Utility {
 
   static void showLog(String message) {
     log(message);
+  }
+
+  static Future<PackageInfo> getPackageInfo() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    return packageInfo;
   }
 
   static String formatDateTime({

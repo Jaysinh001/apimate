@@ -4,6 +4,7 @@ import 'package:apimate/config/utility/utility.dart';
 import 'package:apimate/data/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:upgrader/upgrader.dart';
 
 import 'bloc/theme_bloc/theme_bloc.dart';
@@ -18,13 +19,15 @@ import 'config/theme/color/colors.dart';
 DatabaseService? databaseService;
 late AppColorScheme currentTheme;
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-void main() {
-  WidgetsFlutterBinding.ensureInitialized;
+late PackageInfo packageInfo;
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   databaseService = DatabaseService.instance;
 
   Utility.showLog("database :: $databaseService");
 
   runApp(const MyApp());
+  packageInfo = await Utility.getPackageInfo();
 }
 
 class MyApp extends StatelessWidget {

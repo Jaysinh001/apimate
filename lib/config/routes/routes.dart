@@ -5,7 +5,6 @@ import 'package:apimate/views/load_test/load_test_config_view.dart';
 import 'package:apimate/views/load_test/load_test_live_view.dart';
 import 'package:apimate/views/load_test/select_apis_view.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:upgrader/upgrader.dart';
 
 import '../../domain/model/collection_detail_model/collection_explorer_node.dart';
@@ -16,6 +15,8 @@ import 'routes_name.dart';
 
 class Routes {
   static Route<dynamic> generateRoute(RouteSettings settings) {
+
+
     switch (settings.name) {
       case RoutesName.splashView:
         return MaterialPageRoute(builder: (context) => const SplashView());
@@ -23,15 +24,17 @@ class Routes {
       case RoutesName.apiCollections:
         return MaterialPageRoute(
           builder:
-              (context) => UpgradeAlert(
+              (context) { 
+                
+                return UpgradeAlert(
                 navigatorKey: navigatorKey,
-                barrierDismissible: false,
+                barrierDismissible: true,
                 upgrader: Upgrader(
-                  debugDisplayAlways: true,
-                  durationUntilAlertAgain: Duration(hours: 1),
+                  minAppVersion: packageInfo.version,
+                  durationUntilAlertAgain: Duration(seconds: 5),
                 ),
                 child: const ApiCollectionsScreen(),
-              ),
+              );},
         );
       case RoutesName.importCollectionView:
         return MaterialPageRoute(
